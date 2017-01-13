@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: wuvt-site-am
+  labels:
+    app: wuvt-site
+    instance: am
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: wuvt-site
+        instance: am
+    spec:
+      containers:
+      - name: wuvt-site
+        image: quay.io/wuvt/wuvt-site
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: wuvt-site-am-config
+          mountPath: /data/config
+          readOnly: true
+        - name: wuvt-site-am-ssl
+          mountPath: /data/ssl
+          readOnly: true
+      volumes:
+      - name: wuvt-site-am-config
+        secret:
+          secretName: wuvt-site-am.config
+      - name: wuvt-site-am-ssl
+        secret:
+          secretName: wuvt-site-am.ssl

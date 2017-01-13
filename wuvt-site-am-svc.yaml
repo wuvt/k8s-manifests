@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wuvt-site-am
+  labels:
+    app: wuvt-site
+    instance: am
+spec:
+  selector:
+    app: wuvt-site
+    instance: am
+  ports:
+  - name: https
+    protocol: TCP
+    port: 8444
+    targetPort: 8443
+  externalIPs:
+  - 192.168.0.246
+  - 192.168.0.247
+  - 192.168.0.248
