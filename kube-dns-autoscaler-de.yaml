@@ -28,6 +28,6 @@ spec:
           - --configmap=kube-dns-autoscaler
           - --mode=linear
           - --target=Deployment/kube-dns
-          - --default-params={"linear":{"coresPerReplica":256,"nodesPerReplica":16,"min":1}}
+          - --default-params={"linear":{"coresPerReplica":256,"nodesPerReplica":16,"min":2}}
           - --logtostderr=true
           - --v=2
