@@ -28,6 +28,8 @@ spec:
         - name: wuvt-site-am-ssl
           mountPath: /data/ssl
           readOnly: true
+        - name: wuvt-site-am-media
+          mountPath: /data/media
       volumes:
       - name: wuvt-site-am-config
         secret:
@@ -35,3 +37,6 @@ spec:
       - name: wuvt-site-am-ssl
         secret:
           secretName: wuvt-site-am.ssl
+      - name: wuvt-site-am-media
+        persistentVolumeClaim:
+          claimName: wuvt-site-am-media
