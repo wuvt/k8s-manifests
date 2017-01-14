@@ -30,6 +30,9 @@ spec:
           readOnly: true
         - name: wuvt-site-am-media
           mountPath: /data/media
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
       volumes:
       - name: wuvt-site-am-config
         secret:
@@ -40,3 +43,6 @@ spec:
       - name: wuvt-site-am-media
         persistentVolumeClaim:
           claimName: wuvt-site-am-media
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
