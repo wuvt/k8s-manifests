@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wuvt-site-prod-media
+  labels:
+    app: wuvt-site
+    instance: prod
+    mount: media
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    path: /srv/coreos-storage/wuvt-site-prod-media
+    server: 192.168.0.234

@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: wuvt-site-prod
+  labels:
+    app: wuvt-site
+    instance: prod
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: wuvt-site
+        instance: prod
+    spec:
+      containers:
+      - name: wuvt-site
+        image: quay.io/wuvt/wuvt-site:latest
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: wuvt-site-prod-config
+          mountPath: /data/config
+          readOnly: true
+        - name: wuvt-site-prod-ssl
+          mountPath: /data/ssl
+          readOnly: true
+        - name: wuvt-site-prod-media
+          mountPath: /data/media
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: wuvt-site-prod-config
+        secret:
+          secretName: wuvt-site-prod.config
+      - name: wuvt-site-prod-ssl
+        secret:
+          secretName: wuvt-site-prod.ssl
+      - name: wuvt-site-prod-media
+        persistentVolumeClaim:
+          claimName: wuvt-site-prod-media
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
