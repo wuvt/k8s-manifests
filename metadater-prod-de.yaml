@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: metadater-prod
+  labels:
+    app: metadater
+    instance: prod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: metadater
+        instance: prod
+    spec:
+      containers:
+      - name: metadater
+        image: quay.io/wuvt/metadater:latest
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        volumeMounts:
+        - name: metadater-prod-config
+          mountPath: /data/config
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: metadater-prod-config
+        secret:
+          secretName: metadater-prod.config
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
