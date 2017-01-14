@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: wuvt-site
-        image: quay.io/wuvt/wuvt-site
+        image: quay.io/wuvt/wuvt-site:latest
         env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json
