@@ -1,0 +1,55 @@
+apiVersion: batch/v2alpha1
+kind: ScheduledJob
+metadata:
+  name: postgres-backup
+spec:
+  schedule: 0 9 * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: postgres-backup
+            image: quay.io/wuvt/postgres-backup:latest
+            env:
+            - name: POSTGRES_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-backup
+                  key: postgres.server
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: password
+            - name: DATABASES
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-backup
+                  key: postgres.databases
+            - name: SFTP_DEST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-backup
+                  key: sftp.dest
+            volumeMounts:
+            - name: postgres-backup-ssh-secret
+              mountPath: /etc/sshkeys
+              readOnly: true
+            - name: scratch-volume
+              mountPath: /data
+          volumes: 
+          - name: postgres-backup-ssh-secret
+            secret:
+              secretName: postgres-backup
+              items:
+              - key: backup
+                path: backup
+                mode: 384
+              - key: backup.pub
+                path: backup.pub
+              - key: known_hosts
+                path: known_hosts
+          - name: scratch-volume
+            emptyDir: {}
+          restartPolicy: OnFailure
