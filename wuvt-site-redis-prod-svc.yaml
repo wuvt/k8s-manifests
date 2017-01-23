@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wuvt-site-redis-prod
+  labels:
+    app: wuvt-site-redis
+    instance: prod
+spec:
+  selector:
+    app: wuvt-site-redis
+    instance: prod
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379

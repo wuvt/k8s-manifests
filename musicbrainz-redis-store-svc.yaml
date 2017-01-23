@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: musicbrainz-redis-store
+  labels:
+    app: musicbrainz-redis-store
+spec:
+  selector:
+    app: musicbrainz-redis-store
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
