@@ -52,4 +52,4 @@ spec:
                 path: known_hosts
           - name: scratch-volume
             emptyDir: {}
-          restartPolicy: OnFailure
+          restartPolicy: Never
