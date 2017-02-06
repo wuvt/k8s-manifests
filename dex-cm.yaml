@@ -28,15 +28,15 @@ data:
         bindPW: $SERVICE_PASSWORD
         userSearch:
           baseDN: cn=users,cn=accounts,dc=wuvt,dc=vt,dc=edu
-          filter: '(objectClass=person)'
+          filter: '(objectClass=posixAccount)'
           username: uid
           idAttr: uid
           emailAttr: mail
-          nameAttr: displayName
+          nameAttr: gecos
         groupSearch:
           baseDN: cn=groups,cn=accounts,dc=wuvt,dc=vt,dc=edu
-          filter: '(objectClass=group)'
-          userAttr: uid
+          filter: '(objectClass=posixGroup)'
+          userAttr: DN
           groupAttr: member
           nameAttr: cn
     oauth2:
