@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: dex
+  name: dex
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: dex
+    spec:
+      containers:
+      - image: quay.io/coreos/dex:v2.1.0
+        name: dex
+        command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
+
+        ports:
+        - name: https
+          containerPort: 5556
+
+        volumeMounts:
+        - name: config
+          mountPath: /etc/dex/cfg
+        - name: tls
+          mountPath: /etc/dex/tls
+
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dex.db
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dex.db
+              key: password
+        - name: SERVICE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dex
+              key: username
+        - name: SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dex
+              key: password
+      volumes:
+      - name: config
+        configMap:
+          name: dex
+          items:
+          - key: config.yaml
+            path: config.yaml
+          - key: ldap_ca.pem
+            path: ldap_ca.pem
+      - name: tls
+        secret:
+          secretName: dex.tls
