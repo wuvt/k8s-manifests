@@ -39,7 +39,13 @@ spec:
           secretName: wuvt-site-prod.config
       - name: wuvt-site-prod-ssl
         secret:
-          secretName: wuvt-site-prod.ssl
+          secretName: wuvt-site-prod.tls
+          items:
+          - key: tls.crt
+            path: cert.pem
+          - key: tls.key
+            path: privkey.pem
+            mode: 384
       - name: wuvt-site-prod-media
         persistentVolumeClaim:
           claimName: wuvt-site-prod-media
