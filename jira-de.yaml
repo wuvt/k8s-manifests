@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: jira
+  name: jira
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jira
+    spec:
+      containers:
+      - name: jira
+        image: quay.io/wuvt/docker-atlassian-jira:latest
+        env:
+        - name: X_PROXY_PORT
+          value: "443"
+        - name: X_PROXY_SCHEME
+          value: "https"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: jira-data
+          mountPath: /var/atlassian/jira
+        - name: jira-logs
+          mountPath: /opt/atlassian/jira/logs
+      volumes:
+      - name: jira-data
+        hostPath:
+          path: /var/lib/jira
+      - name: jira-logs
+        hostPath:
+          path: /var/log/jira
+      nodeName: churchrock
