@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: wuvt-site-redis
+    instance: am
+  name: wuvt-site-redis-am
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: wuvt-site-redis
+        instance: am
+    spec:
+      containers:
+      - name: redis
+        image: redis:3.2-alpine
+        args:
+        - '--requirepass $(REDIS_PASSWORD)'
+        - '--rename-command CONFIG ""'
+        - '--appendonly yes'
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wuvt-site-redis-am
+              key: password
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /media/local-storage/wuvt-site-redis-am-data
+      nodeName: columbia

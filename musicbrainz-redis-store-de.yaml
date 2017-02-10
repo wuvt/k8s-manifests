@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: musicbrainz-redis-store
+  name: musicbrainz-redis-store
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: musicbrainz-redis-store
+    spec:
+      containers:
+      - name: redis
+        image: redis:3.2-alpine
+        args:
+        - '--appendonly yes'
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /media/local-storage/musicbrainz-redis-store-data
+      nodeName: columbia
