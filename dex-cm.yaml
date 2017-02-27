@@ -18,11 +18,12 @@ data:
       tlsCert: /etc/dex/tls/tls.crt
       tlsKey: /etc/dex/tls/tls.key
     frontend:
+      issuer: WUVT
       theme: wuvt
     connectors:
     - type: ldap
       id: ldap
-      name: LDAP
+      name: WUVT
       config:
         host: zolitude.wuvt.vt.edu:636
         rootCA: /etc/dex/cfg/ldap_ca.pem
@@ -43,7 +44,7 @@ data:
           nameAttr: cn
     - type: github
       id: github
-      name: Github
+      name: GitHub
       config:
         redirectURI: https://id.apps.wuvt.vt.edu/callback
         clientID: $GITHUB_CLIENT_ID
