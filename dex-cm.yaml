@@ -41,13 +41,13 @@ data:
           userAttr: DN
           groupAttr: member
           nameAttr: cn
-      - type: github
-        id: github
-        name: Github
-        config:
-          redirectURI: https://id.apps.wuvt.vt.edu/callback
-          clientID: $GITHUB_CLIENT_ID
-          clientSecret: $GITHUB_CLIENT_SECRET
+    - type: github
+      id: github
+      name: Github
+      config:
+        redirectURI: https://id.apps.wuvt.vt.edu/callback
+        clientID: $GITHUB_CLIENT_ID
+        clientSecret: $GITHUB_CLIENT_SECRET
 
     oauth2:
       skipApprovalScreen: true
