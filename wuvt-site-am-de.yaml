@@ -47,8 +47,13 @@ spec:
             path: privkey.pem
             mode: 384
       - name: wuvt-site-am-media
-        persistentVolumeClaim:
-          claimName: wuvt-site-am-media
+        cephfs:
+          monitors:
+            - 192.168.0.234:6789
+          path: /wuvt-site-am/media
+          user: k8s
+          secretRef:
+            name: ceph-k8s
       - name: tzinfo
         hostPath:
           path: /usr/share/zoneinfo/America/New_York
