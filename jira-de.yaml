@@ -28,9 +28,18 @@ spec:
           mountPath: /opt/atlassian/jira/logs
       volumes:
       - name: jira-data
-        hostPath:
-          path: /var/lib/jira
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          user: k8s
+          path: /jira/data
+          secretRef:
+            name: ceph-k8s
       - name: jira-logs
-        hostPath:
-          path: /var/log/jira
-      nodeName: churchrock
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          user: k8s
+          path: /jira/logs
+          secretRef:
+            name: ceph-k8s
