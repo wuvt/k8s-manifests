@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: linx
+  name: linx
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: linx
+    spec:
+      containers:
+      - name: linx
+        image: quay.io/wuvt/linx:v1.2.6
+        args:
+        - '-sitename=wuvtLinx'
+        - '-siteurl=https://linx.apps.wuvt.vt.edu/'
+        - '-allowhotlink'
+        - '-maxexpiry=604800'
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: linx-files
+          mountPath: /data/files
+        - name: linx-meta
+          mountPath: /data/meta
+      volumes:
+      - name: linx-files
+        cephfs:
+          monitors:
+            - 192.168.0.234:6789
+          path: /linx/files
+          user: k8s
+          secretRef:
+            name: ceph-k8s
+      - name: linx-meta
+        cephfs:
+          monitors:
+            - 192.168.0.234:6789
+          path: /linx/meta
+          user: k8s
+          secretRef:
+            name: ceph-k8s
