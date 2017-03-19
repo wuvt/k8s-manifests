@@ -49,6 +49,13 @@ data:
         redirectURI: https://id.apps.wuvt.vt.edu/callback
         clientID: $GITHUB_CLIENT_ID
         clientSecret: $GITHUB_CLIENT_SECRET
+    - type: oidc
+      id: google
+      name: Google Apps
+      config:
+        redirectURI: https://id.apps.wuvt.vt.edu/callback
+        clientID: $GOOGLE_CLIENT_ID
+        clientSecret: $GOOGLE_CLIENT_SECRET
 
     oauth2:
       skipApprovalScreen: true
