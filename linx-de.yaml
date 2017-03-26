@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: linx
-        image: quay.io/wuvt/linx:v1.2.6
+        image: quay.io/wuvt/linx:v1.2.7
         args:
         - '-sitename=wuvtLinx'
         - '-siteurl=https://linx.apps.wuvt.vt.edu/'
