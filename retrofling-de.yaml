@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: retrofling
+  name: retrofling
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: retrofling
+    spec:
+      containers:
+      - name: retrofling
+        image: quay.io/wuvt/retrofling:latest
+        ports:
+        - containerPort: 8080
