@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: radiotextual-prod
+  labels:
+    app: radiotextual
+    instance: prod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: radiotextual
+        instance: prod
+    spec:
+      containers:
+      - name: radiotextual
+        image: quay.io/wuvt/radiotextual:latest
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        volumeMounts:
+        - name: radiotextual-prod-config
+          mountPath: /data/config
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: radiotextual-prod-config
+        secret:
+          secretName: radiotextual-prod.config
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
