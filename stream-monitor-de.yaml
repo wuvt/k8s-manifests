@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stream-monitor
+  labels:
+    app: stream-monitor
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: stream-monitor
+    spec:
+      containers:
+      - name: stream-monitor
+        image: quay.io/wuvt/stream-monitor:latest
+        volumeMounts:
+        - name: stream-monitor-data
+          mountPath: /data
+          readOnly: true
+      volumes:
+      - name: stream-monitor-data
+        secret:
+          secretName: stream-monitor
+          items:
+          - key: silence.sh
+            path: silence.sh
+            mode: 493
