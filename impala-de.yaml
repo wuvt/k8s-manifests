@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: impala
+    instance: prod
+  name: impala
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: impala
+        instance: prod
+    spec:
+      containers:
+      - env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        image: quay.io/wuvt/impala
+        imagePullPolicy: Always
+        name: impala
+        ports:
+        - containerPort: 8011
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /data/config
+          name: impala-config
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: tzinfo
+          readOnly: true
+      volumes:
+      - name: impala-config
+        secret:
+          defaultMode: 420
+          secretName: impala.config
+      - hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+        name: tzinfo

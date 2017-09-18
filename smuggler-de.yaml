@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: smuggler
+    instance: prod
+  name: smuggler
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: smuggler
+        instance: prod
+    spec:
+      containers:
+      - env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        image: quay.io/wuvt/smuggler
+        imagePullPolicy: Always
+        name: smuggler
+        ports:
+        - containerPort: 5000
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /data/config
+          name: smuggler-config
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: tzinfo
+          readOnly: true
+      volumes:
+      - name: smuggler-config
+        secret:
+          defaultMode: 420
+          secretName: smuggler.config
+      - hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+        name: tzinfo
