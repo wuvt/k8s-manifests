@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:3.2-alpine
+        image: redis:4-alpine
         args:
         - '--maxmemory 8MB'
         - '--maxmemory-policy allkeys-lru'
