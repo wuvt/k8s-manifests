@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: notecharlie
+  labels:
+    app: notecharlie
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: notecharlie
+    spec:
+      containers:
+      - name: notecharlie
+        image: quay.io/wuvt/notecharlie:latest
+        volumeMounts:
+        - name: notecharlie-data
+          mountPath: /home/bot/.phenny
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: notecharlie-data
+        cephfs:
+          monitors:
+            - 192.168.0.234:6789
+          path: /notecharlie
+          user: k8s
+          secretRef:
+            name: ceph-k8s
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
