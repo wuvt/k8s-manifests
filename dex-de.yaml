@@ -47,26 +47,6 @@ spec:
             secretKeyRef:
               name: dex
               key: password
-        - name: GITHUB_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: dex.github
-              key: clientid
-        - name: GITHUB_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: dex.github
-              key: clientsecret
-        - name: GOOGLE_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: dex.google
-              key: clientid
-        - name: GOOGLE_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: dex.google
-              key: clientsecret
       volumes:
       - name: config
         configMap:

@@ -1,5 +1,5 @@
-apiVersion: batch/v2alpha1
-kind: ScheduledJob
+apiVersion: batch/v1beta1
+kind: CronJob
 metadata:
   name: postgres-backup
 spec:
@@ -36,9 +36,7 @@ spec:
             - name: postgres-backup-ssh-secret
               mountPath: /etc/sshkeys
               readOnly: true
-            - name: scratch-volume
-              mountPath: /data
-          volumes: 
+          volumes:
           - name: postgres-backup-ssh-secret
             secret:
               secretName: postgres-backup
@@ -50,6 +48,4 @@ spec:
                 path: backup.pub
               - key: known_hosts
                 path: known_hosts
-          - name: scratch-volume
-            emptyDir: {}
           restartPolicy: Never
