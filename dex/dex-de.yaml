@@ -4,6 +4,7 @@ metadata:
   labels:
     app: dex
   name: dex
+  namespace: dex
 spec:
   replicas: 2
   template:
@@ -12,7 +13,7 @@ spec:
         app: dex
     spec:
       containers:
-      - image: quay.io/wuvt/dex-wuvt:v2.7.1
+      - image: quay.io/wuvt/dex-wuvt:v2.9.0
         name: dex
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
 
@@ -27,16 +28,6 @@ spec:
           mountPath: /etc/dex/tls
 
         env:
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: dex.db
-              key: username
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: dex.db
-              key: password
         - name: SERVICE_USERNAME
           valueFrom:
             secretKeyRef:
@@ -59,3 +50,4 @@ spec:
       - name: tls
         secret:
           secretName: dex.tls
+      serviceAccountName: dex

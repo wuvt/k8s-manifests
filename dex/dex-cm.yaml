@@ -6,17 +6,15 @@ data:
   config.yaml: |
     issuer: https://id.apps.wuvt.vt.edu
     storage:
-      type: postgres
+      type: kubernetes
       config:
-        host: postgres.default.svc.cluster.local
-        user: $DB_USERNAME
-        password: $DB_PASSWORD
-        ssl:
-          mode: disable
+        inCluster: true
     web:
       https: 0.0.0.0:5556
       tlsCert: /etc/dex/tls/tls.crt
       tlsKey: /etc/dex/tls/tls.key
+    telemetry:
+      http: 0.0.0.0:5558
     frontend:
       issuer: WUVT
       theme: wuvt
