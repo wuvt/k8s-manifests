@@ -20,6 +20,12 @@ spec:
         ports:
         - name: https
           containerPort: 5556
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /healthz
+            port: 5556
+          initialDelaySeconds: 3
 
         volumeMounts:
         - name: config
