@@ -30,3 +30,7 @@ spec:
         hostPath:
           path: /media/local-storage/postgres-data
       nodeName: columbia
+      tolerations:
+      - key: node-role.kubernetes.io/dbserver
+        operator: Exists
+        effect: NoSchedule

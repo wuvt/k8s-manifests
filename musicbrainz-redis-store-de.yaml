@@ -26,3 +26,7 @@ spec:
         hostPath:
           path: /media/local-storage/musicbrainz-redis-store-data
       nodeName: columbia
+      tolerations:
+      - key: node-role.kubernetes.io/dbserver
+        operator: Exists
+        effect: NoSchedule
