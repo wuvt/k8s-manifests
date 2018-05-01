@@ -6,7 +6,7 @@ metadata:
   name: dex
   namespace: dex
 spec:
-  replicas: 2
+  replicas: 3
   template:
     metadata:
       labels:
