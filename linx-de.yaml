@@ -14,6 +14,15 @@ spec:
       containers:
       - name: linx
         image: quay.io/wuvt/linx:v1.2.7
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
         args:
         - '-sitename=wuvtLinx'
         - '-siteurl=https://linx.apps.wuvt.vt.edu/'
