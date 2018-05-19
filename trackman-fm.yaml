@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trackman-fm
+  labels:
+    app: trackman
+    instance: fm
+spec:
+  selector:
+    app: trackman
+    instance: fm
+  ports:
+  - name: https
+    protocol: TCP
+    port: 7443
+    targetPort: 8443
+  externalIPs:
+  - 192.168.0.246
+  - 192.168.0.247
+  - 192.168.0.248
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trackman-fm
+  labels:
+    app: trackman
+    instance: fm
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: trackman
+        instance: fm
+    spec:
+      containers:
+      - name: trackman
+        image: quay.io/wuvt/trackman:latest
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: trackman-fm-config
+          mountPath: /data/config
+          readOnly: true
+        - name: trackman-fm-ssl
+          mountPath: /data/ssl
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: trackman-fm-config
+        secret:
+          secretName: trackman-fm.config
+      - name: trackman-fm-ssl
+        secret:
+          secretName: trackman-fm.tls
+          items:
+          - key: tls.crt
+            path: cert.pem
+          - key: tls.key
+            path: privkey.pem
+            mode: 384
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
