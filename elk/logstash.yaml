@@ -17,7 +17,7 @@ spec:
     port: 5044
     targetPort: 5044
   externalIPs:
-  - 192.168.0.166
+  - 192.168.0.164
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment

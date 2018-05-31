@@ -52,7 +52,7 @@ spec:
       - name: nginx-auth
         secret:
           secretName: elasticsearch-nginx-auth
-      nodeName: nedelin
+      nodeName: polyus
       tolerations:
       - key: node-role.kubernetes.io/elk
         operator: Exists
