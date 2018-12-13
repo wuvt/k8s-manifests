@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: warrior-config
+  namespace: archiveteam
+data:
+  warrior.downloader: wuvt
+  warrior.concurrent_items: '6'
+  warrior.selected_project: auto
