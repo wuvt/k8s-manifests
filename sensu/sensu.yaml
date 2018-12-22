@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensu-backend
+  namespace: sensu
+spec:
+  type: LoadBalancer
+  selector:
+    app: sensu-backend
+  ports:
+    - name: api
+      protocol: TCP
+      port: 18080
+      targetPort: 8080
+    - name: ws
+      protocol: TCP
+      port: 18081
+      targetPort: 8081
+    - name: dashboard
+      protocol: TCP
+      port: 13000
+      targetPort: 3000
+  externalIPs:
+  - 192.168.0.246
+  - 192.168.0.247
+  - 192.168.0.248
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensu-backend
+  namespace: sensu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensu-backend
+  template:
+    metadata:
+      name: sensu-backend
+      labels:
+        app: sensu-backend
+    spec:
+      containers:
+      - name: sensu-backend
+        image: sensu/sensu:5.1.0
+        #command: ["/opt/sensu/bin/sensu-backend", "start", "--cert-file", "/etc/sensu/tls/cert.pem", "--key-file", "/etc/sensu/tls/key.pem"]
+        command: ["/opt/sensu/bin/sensu-backend", "start"]
+        ports:
+          - protocol: TCP
+            containerPort: 8080
+          - protocol: TCP
+            containerPort: 8081
+          - protocol: TCP
+            containerPort: 3000
+        volumeMounts:
+        - name: sensu-data
+          mountPath: /var/lib/sensu
+          readOnly: false
+          #- name: sensu-tls
+          #  mountPath: /etc/sensu/backend.yml
+          #  subPath: backend.yml
+          #  readOnly: true
+      volumes:
+          #- name: sensu
+          #  secret:
+          #    secretName: sensu.tls
+          #    items:
+          #    - key: tls.crt
+          #      path: cert.pem
+          #    - key: tls.key
+          #      path: key.pem
+          #      mode: 384
+      - name: sensu-data
+        cephfs:
+          monitors:
+            - 192.168.0.234:6789
+          path: /wuvt-site-prod/media
+          user: k8s
+          secretRef:
+            name: ceph-k8s
