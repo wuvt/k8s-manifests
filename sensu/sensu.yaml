@@ -32,6 +32,9 @@ metadata:
   namespace: sensu
 spec:
   replicas: 1
+  strategy:
+      rollingUpdate:
+          maxSurge: 1
   selector:
     matchLabels:
       app: sensu-backend
@@ -45,7 +48,7 @@ spec:
       - name: sensu-backend
         image: sensu/sensu:5.1.0
         #command: ["/opt/sensu/bin/sensu-backend", "start", "--cert-file", "/etc/sensu/tls/cert.pem", "--key-file", "/etc/sensu/tls/key.pem"]
-        command: ["/opt/sensu/bin/sensu-backend", "start"]
+        command: ["/opt/sensu/bin/sensu-backend", "start", "--log-level", "info"]
         ports:
           - protocol: TCP
             containerPort: 8080
@@ -75,7 +78,7 @@ spec:
         cephfs:
           monitors:
             - 192.168.0.234:6789
-          path: /wuvt-site-prod/media
+          path: /sensu
           user: k8s
           secretRef:
             name: ceph-k8s
