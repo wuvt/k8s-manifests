@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warrior2
+  namespace: archiveteam
+spec:
+  selector:
+    matchLabels:
+      app: warrior2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: warrior2
+    spec:
+      containers:
+      - name: warrior
+        image: archiveteam/warrior-dockerfile:latest
+        env:
+        - name: DOWNLOADER
+          valueFrom:
+            configMapKeyRef:
+              name: warrior2-config
+              key: warrior.downloader
+        - name: SELECTED_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: warrior2-config
+              key: warrior.selected_project
+        - name: CONCURRENT_ITEMS
+          valueFrom:
+            configMapKeyRef:
+              name: warrior2-config
+              key: warrior.concurrent_items
+        - name: HTTP_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: warrior-secret
+              key: http_username
+        - name: HTTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: warrior-secret
+              key: http_password
