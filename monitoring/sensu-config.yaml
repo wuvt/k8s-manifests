@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensu-config
+  namespace: sensu
+data:
+  backend.yml: |
+    
+
