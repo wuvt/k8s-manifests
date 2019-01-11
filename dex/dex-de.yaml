@@ -25,7 +25,7 @@ spec:
             scheme: HTTPS
             path: /healthz
             port: 5556
-          initialDelaySeconds: 3
+          initialDelaySeconds: 30
 
         volumeMounts:
         - name: config
