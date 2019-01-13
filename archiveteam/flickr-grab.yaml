@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flickr-grab
+  namespace: archiveteam
+spec:
+  selector:
+    matchLabels:
+      app: flickr-grab
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: flickr-grab
+    spec:
+      containers:
+      - name: flickr-grab
+        image: mutantmonkey/flickr-grab:latest
+        command:
+        - "run-pipeline3"
+        - "pipeline.py"
+        - "--concurrent"
+        - "6"
+        - "--disable-web-server"
+        - "wuvt"

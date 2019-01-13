@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uolforums-grab
+  namespace: archiveteam
+spec:
+  selector:
+    matchLabels:
+      app: uolforums-grab
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: uolforums-grab
+    spec:
+      containers:
+      - name: uolforums-grab
+        image: mutantmonkey/uolforums-grab:latest
+        command:
+        - "run-pipeline3"
+        - "pipeline.py"
+        - "--concurrent"
+        - "6"
+        - "--disable-web-server"
+        - "wuvt"
