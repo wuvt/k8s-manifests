@@ -18,6 +18,7 @@ spec:
         image: mutantmonkey/flickr-grab:latest
         command:
         - "run-pipeline3"
+        args:
         - "pipeline.py"
         - "--concurrent"
         - "6"
