@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terroroftinytown-client-grab
+  namespace: archiveteam
+spec:
+  selector:
+    matchLabels:
+      app: terroroftinytown-client-grab
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: terroroftinytown-client-grab
+    spec:
+      containers:
+      - name: terroroftinytown-client-grab
+        image: mutantmonkey/terroroftinytown-client-grab:latest
+        command:
+        - "run-pipeline3"
+        args:
+        - "pipeline.py"
+        - "--concurrent"
+        - "6"
+        - "--disable-web-server"
+        - "wuvt"
