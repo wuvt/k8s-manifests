@@ -1,6 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
+  namespace: elk
   name: logstash-pruner
 spec:
   schedule: 0 10 * * *

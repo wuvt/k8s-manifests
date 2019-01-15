@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: elk
   name: elasticsearch
   labels:
     app: elasticsearch
@@ -16,6 +17,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  namespace: elk
   name: elasticsearch
   labels:
     app: elasticsearch
