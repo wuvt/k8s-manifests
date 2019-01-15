@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: linx
-        image: quay.io/wuvt/linx:v1.2.7
+        image: quay.io/wuvt/linx:v1.3.2
         livenessProbe:
           httpGet:
             path: /
