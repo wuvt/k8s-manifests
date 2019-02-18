@@ -1,7 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: musicbrainz-redis-cache
+  namespace: musicbrainz
+  labels:
+    app: musicbrainz-redis-cache
+spec:
+  selector:
+    app: musicbrainz-redis-cache
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: musicbrainz-redis-cache
+  namespace: musicbrainz
   labels:
     app: musicbrainz-redis-cache
 spec:
