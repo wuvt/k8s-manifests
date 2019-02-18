@@ -1,17 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wuvt-site-redis-prod-mgmt
+spec:
+  containers:
+  - name: redis
+    image: redis:4-alpine
+    command:
+    - sh
+    stdin: true
+    tty: true
+    volumeMounts:
+    - name: redis-data
+      mountPath: /data
+  volumes:
+  - name: redis-data
+    hostPath:
+      path: /media/local-storage/wuvt-site-redis-prod-data
+  nodeName: columbia
+  tolerations:
+  - key: node-role.kubernetes.io/dbserver
+    operator: Exists
+    effect: NoSchedule
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
     app: wuvt-site-redis
-    instance: am
-  name: wuvt-site-redis-am
+    instance: prod
+  name: wuvt-site-redis-prod
 spec:
   replicas: 1
   template:
     metadata:
       labels:
         app: wuvt-site-redis
-        instance: am
+        instance: prod
     spec:
       containers:
       - name: redis
@@ -24,7 +49,7 @@ spec:
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: wuvt-site-redis-am
+              name: wuvt-site-redis-prod
               key: password
         ports:
         - containerPort: 6379
@@ -34,7 +59,7 @@ spec:
       volumes:
       - name: redis-data
         hostPath:
-          path: /media/local-storage/wuvt-site-redis-am-data
+          path: /media/local-storage/wuvt-site-redis-prod-data
       nodeName: columbia
       tolerations:
       - key: node-role.kubernetes.io/dbserver

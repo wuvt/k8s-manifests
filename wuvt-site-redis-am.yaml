@@ -1,17 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wuvt-site-redis-am
+  labels:
+    app: wuvt-site-redis
+    instance: am
+spec:
+  selector:
+    app: wuvt-site-redis
+    instance: am
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
     app: wuvt-site-redis
-    instance: prod
-  name: wuvt-site-redis-prod
+    instance: am
+  name: wuvt-site-redis-am
 spec:
   replicas: 1
   template:
     metadata:
       labels:
         app: wuvt-site-redis
-        instance: prod
+        instance: am
     spec:
       containers:
       - name: redis
@@ -24,7 +40,7 @@ spec:
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: wuvt-site-redis-prod
+              name: wuvt-site-redis-am
               key: password
         ports:
         - containerPort: 6379
@@ -34,7 +50,7 @@ spec:
       volumes:
       - name: redis-data
         hostPath:
-          path: /media/local-storage/wuvt-site-redis-prod-data
+          path: /media/local-storage/wuvt-site-redis-am-data
       nodeName: columbia
       tolerations:
       - key: node-role.kubernetes.io/dbserver
