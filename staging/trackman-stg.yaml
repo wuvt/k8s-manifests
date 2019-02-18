@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trackman-stg
+  namespace: staging
+  labels:
+    app: trackman
+    instance: stg
+spec:
+  selector:
+    app: trackman
+    instance: stg
+  ports:
+  - name: https
+    protocol: TCP
+    port: 7448
+    targetPort: 443
+  externalIPs:
+  - 192.168.0.246
+  - 192.168.0.247
+  - 192.168.0.248
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trackman-stg
+  namespace: staging
+  labels:
+    app: trackman
+    instance: stg
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: trackman
+        instance: stg
+    spec:
+      containers:
+      - name: trackman
+        image: quay.io/wuvt/trackman:latest
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        volumeMounts:
+        - name: trackman-stg-config
+          mountPath: /data/config
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      - name: nginx
+        image: quay.io/wuvt/trackman-nginx:latest
+        ports:
+        - containerPort: 443
+        volumeMounts:
+        - name: trackman-stg-nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+        - name: trackman-stg-ssl
+          mountPath: /data/ssl
+          readOnly: true
+      volumes:
+      - name: trackman-stg-config
+        secret:
+          secretName: trackman-stg.config
+      - name: trackman-stg-nginx-config
+        secret:
+          secretName: trackman-stg.nginx
+      - name: trackman-stg-ssl
+        secret:
+          secretName: trackman-stg.tls
+          items:
+          - key: tls.crt
+            path: cert.pem
+          - key: tls.key
+            path: privkey.pem
+            mode: 384
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trackman-stg-redis
+  namespace: staging
+  labels:
+    app: trackman-redis
+    instance: stg
+spec:
+  selector:
+    app: trackman-redis
+    instance: stg
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trackman-stg-redis
+  namespace: staging
+  labels:
+    app: trackman-redis
+    instance: stg
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trackman-redis
+        instance: stg
+    spec:
+      containers:
+      - name: redis
+        image: redis:4-alpine
+        args:
+        - '--requirepass $(REDIS_PASSWORD)'
+        - '--rename-command CONFIG ""'
+        - '--appendonly yes'
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: trackman-stg-redis
+              key: password
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /media/local-storage/trackman-stg-redis-data
+      nodeName: columbia
+      tolerations:
+      - key: node-role.kubernetes.io/dbserver
+        operator: Exists
+        effect: NoSchedule
