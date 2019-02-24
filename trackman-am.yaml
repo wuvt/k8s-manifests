@@ -82,7 +82,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: trackman-scheduler-am
-  namespace: staging
   labels:
     app: trackman-scheduler
     instance: am
