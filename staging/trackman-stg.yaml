@@ -80,6 +80,44 @@ spec:
         hostPath:
           path: /usr/share/zoneinfo/America/New_York
 ---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trackman-scheduler-stg
+  namespace: staging
+  labels:
+    app: trackman-scheduler
+    instance: stg
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trackman-scheduler
+        instance: stg
+    spec:
+      containers:
+      - name: trackman
+        image: quay.io/wuvt/trackman:latest
+        command: ["flask", "run-scheduler"]
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        volumeMounts:
+        - name: trackman-stg-config
+          mountPath: /data/config
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: trackman-stg-config
+        secret:
+          secretName: trackman-stg.config
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+---
 apiVersion: v1
 kind: Service
 metadata:

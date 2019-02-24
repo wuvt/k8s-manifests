@@ -13,7 +13,7 @@ spec:
   - name: https
     protocol: TCP
     port: 7444
-    targetPort: 8443
+    targetPort: 443
   externalIPs:
   - 192.168.0.246
   - 192.168.0.247
@@ -40,22 +40,31 @@ spec:
         env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json
-        ports:
-        - containerPort: 8443
         volumeMounts:
         - name: trackman-am-config
           mountPath: /data/config
           readOnly: true
-        - name: trackman-am-ssl
-          mountPath: /data/ssl
-          readOnly: true
         - name: tzinfo
           mountPath: /etc/localtime
+          readOnly: true
+      - name: nginx
+        image: quay.io/wuvt/trackman-nginx:latest
+        ports:
+        - containerPort: 443
+        volumeMounts:
+        - name: trackman-am-nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+        - name: trackman-am-ssl
+          mountPath: /data/ssl
           readOnly: true
       volumes:
       - name: trackman-am-config
         secret:
           secretName: trackman-am.config
+      - name: trackman-am-nginx-config
+        secret:
+          secretName: trackman-am.nginx
       - name: trackman-am-ssl
         secret:
           secretName: trackman-am.tls
@@ -68,3 +77,100 @@ spec:
       - name: tzinfo
         hostPath:
           path: /usr/share/zoneinfo/America/New_York
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trackman-scheduler-am
+  namespace: staging
+  labels:
+    app: trackman-scheduler
+    instance: am
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trackman-scheduler
+        instance: am
+    spec:
+      containers:
+      - name: trackman
+        image: quay.io/wuvt/trackman:latest
+        command: ["flask", "run-scheduler"]
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        volumeMounts:
+        - name: trackman-am-config
+          mountPath: /data/config
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: trackman-am-config
+        secret:
+          secretName: trackman-am.config
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trackman-am-redis
+  labels:
+    app: trackman-redis
+    instance: am
+spec:
+  selector:
+    app: trackman-redis
+    instance: am
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: trackman-redis
+    instance: am
+  name: trackman-am-redis
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trackman-redis
+        instance: am
+    spec:
+      containers:
+      - name: redis
+        image: redis:4-alpine
+        args:
+        - '--requirepass $(REDIS_PASSWORD)'
+        - '--rename-command CONFIG ""'
+        - '--appendonly yes'
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: trackman-am-redis
+              key: password
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /media/local-storage/trackman-am-redis-data
+      nodeName: columbia
+      tolerations:
+      - key: node-role.kubernetes.io/dbserver
+        operator: Exists
+        effect: NoSchedule
