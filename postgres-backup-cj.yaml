@@ -32,6 +32,11 @@ spec:
                 configMapKeyRef:
                   name: postgres-backup
                   key: sftp.dest
+            - name: HEALTHCHECK_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-backup
+                  key: healthcheck_webhook
             volumeMounts:
             - name: postgres-backup-ssh-secret
               mountPath: /etc/sshkeys
