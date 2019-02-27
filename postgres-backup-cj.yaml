@@ -37,6 +37,7 @@ spec:
                 secretKeyRef:
                   name: postgres-backup
                   key: healthcheck_webhook
+                  optional: true
             volumeMounts:
             - name: postgres-backup-ssh-secret
               mountPath: /etc/sshkeys
