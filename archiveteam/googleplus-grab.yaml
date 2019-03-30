@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flickr-grab
+  name: googleplus-grab
   namespace: archiveteam
 spec:
   selector:
     matchLabels:
-      app: flickr-grab
-  replicas: 1
+      app: googleplus-grab
+  replicas: 2
   template:
     metadata:
       labels:
-        app: flickr-grab
+        app: googleplus-grab
     spec:
       containers:
-      - name: flickr-grab
-        image: mutantmonkey/flickr-grab:latest
+      - name: googleplus-grab
+        image: mutantmonkey/googleplus-grab:latest
         command:
         - "run-pipeline3"
         args:
