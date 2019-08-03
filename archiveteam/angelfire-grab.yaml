@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angelfire-grab
+  namespace: archiveteam
+spec:
+  selector:
+    matchLabels:
+      app: angelfire-grab
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: angelfire-grab
+    spec:
+      containers:
+      - name: angelfire-grab
+        image: mutantmonkey/angelfire-grab:latest
+        args:
+        - "wuvt"
