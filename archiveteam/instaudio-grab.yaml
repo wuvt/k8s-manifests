@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: instaudio-grab
+  namespace: archiveteam
+spec:
+  selector:
+    matchLabels:
+      app: instaudio-grab
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: instaudio-grab
+    spec:
+      containers:
+      - name: instaudio-grab
+        image: warcforceone/instaudio-grab:latest
+        args:
+        - "wuvt"
