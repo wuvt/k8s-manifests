@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: googleplus-grab
-  replicas: 2
+  replicas: 4
   template:
     metadata:
       labels:
