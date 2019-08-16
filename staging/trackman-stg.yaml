@@ -178,3 +178,55 @@ spec:
       - key: node-role.kubernetes.io/dbserver
         operator: Exists
         effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trackman-stg-redis-cache
+  namespace: staging
+  labels:
+    app: trackman-redis-cache
+    instance: stg
+spec:
+  selector:
+    app: trackman-redis-cache
+    instance: stg
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trackman-stg-redis-cache
+  namespace: staging
+  labels:
+    app: trackman-redis-cache
+    instance: stg
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trackman-redis-cache
+        instance: stg
+    spec:
+      containers:
+      - name: redis
+        image: redis:4-alpine
+        args:
+        - '--requirepass $(REDIS_PASSWORD)'
+        - '--rename-command CONFIG ""'
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: trackman-stg-redis-cache
+              key: password
+        ports:
+        - containerPort: 6379
+      tolerations:
+      - key: node-role.kubernetes.io/dbserver
+        operator: Exists
+        effect: NoSchedule
