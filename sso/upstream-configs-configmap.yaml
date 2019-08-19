@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: upstream-configs
+  namespace: sso
+data:
+  upstream_configs.yml: |-
+    - service: files
+      default:
+        from: files.apps.wuvt.vt.edu
+        to: http://alexandria.wuvt.vt.edu/

@@ -1,0 +1,75 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sso-proxy
+  labels:
+    k8s-app: sso-proxy
+  namespace: sso
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: sso-proxy
+    spec:
+      containers:
+      - image: buzzfeed/sso:latest
+        name: sso-proxy
+        command: ["/bin/sso-proxy"]
+        ports:
+        - containerPort: 4180
+        env:
+          - name: EMAIL_DOMAIN
+            value: 'wuvt.vt.edu'
+          - name: UPSTREAM_CONFIGS
+            value: /sso/upstream_configs.yml
+          - name: PROVIDER_URL
+            value: https://sso-auth.apps.wuvt.vt.edu
+          - name: CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: proxy-client-id
+                key: proxy-client-id
+          - name: CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: proxy-client-secret
+                key: proxy-client-secret
+          - name: COOKIE_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: proxy-cookie-secret
+                key: proxy-cookie-secret
+          # STATSD_HOST and STATSD_PORT must be defined or the app wont launch, they dont need to be a real host / port, but they do need to be defined.
+          - name: STATSD_HOST
+            value: localhost
+          - name: STATSD_PORT
+            value: "11111"
+          - name: CLUSTER
+            value: dev
+          - name: VIRTUAL_HOST
+            value: "*.apps.wuvt.vt.edu"
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 4180
+            scheme: HTTP
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 4180
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        volumeMounts:
+        - name: upstream-configs
+          mountPath: /sso
+          readOnly: true
+      volumes:
+        - name: upstream-configs
+          configMap:
+            name: upstream-configs

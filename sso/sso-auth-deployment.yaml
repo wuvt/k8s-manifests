@@ -1,0 +1,105 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sso-auth
+  labels:
+    k8s-app: sso-auth
+  namespace: sso
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: sso-auth
+    spec:
+      containers:
+      - image: buzzfeed/sso-dev:latest
+        name: sso-auth
+        command: ["/bin/sso-auth"]
+        ports:
+        - containerPort: 4180
+        env:
+          - name: AUTHORIZE_EMAIL_DOMAINS
+            value: wuvt.vt.edu
+          - name: AUTHORIZE_PROXY_DOMAINS
+            value: vt.edu
+          - name: SERVER_SCHEME
+            value: https
+          - name: SERVER_HOST
+            value: sso-auth.apps.wuvt.vt.edu
+          - name: REDIRECT_URL
+            value: https://sso-auth.apps.wuvt.vt.edu
+          - name: PROVIDER_GOOGLE_TYPE
+            value: google
+          - name: PROVIDER_GOOGLE_SLUG
+            value: google
+          - name: PROVIDER_GOOGLE_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: google-client-id
+                key: client-id
+          - name: PROVIDER_GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: google-client-secret
+                key: client-secret
+          - name: PROVIDER_GOOGLE_GOOGLE_IMPERSONATE
+            valueFrom:
+              secretKeyRef:
+                name: google-admin-email
+                key: email
+          - name: PROVIDER_GOOGLE_GOOGLE_CREDENTIALS
+            value: /creds/service_account.json
+          - name: CLIENT_PROXY_ID
+            valueFrom:
+              secretKeyRef:
+                name: proxy-client-id
+                key: proxy-client-id
+          - name: CLIENT_PROXY_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: proxy-client-secret
+                key: proxy-client-secret
+          - name: SESSION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: auth-code-secret
+                key: auth-code-secret
+          - name: SESSION_COOKIE_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: auth-cookie-secret
+                key: auth-cookie-secret
+          # METRICS_STATSD_HOST and METRICS_STATSD_PORT must be defined or the app wont launch, they dont need to be a real host / port
+          - name: METRICS_STATSD_HOST
+            value: localhost
+          - name: METRICS_STATSD_PORT
+            value: "11111"
+          - name: CLUSTER
+            value: dev
+          - name: VIRTUAL_HOST
+            value: sso-auth.apps.wuvt.vt.edu
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 4180
+            scheme: HTTP
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 4180
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        volumeMounts:
+          - name: google-service-account
+            mountPath: "/creds"
+      volumes:
+        - name: google-service-account
+          secret:
+            secretName: google-service-account
+
