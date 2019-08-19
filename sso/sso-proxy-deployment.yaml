@@ -6,7 +6,7 @@ metadata:
     k8s-app: sso-proxy
   namespace: sso
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:

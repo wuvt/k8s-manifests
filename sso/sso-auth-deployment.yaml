@@ -6,7 +6,7 @@ metadata:
     k8s-app: sso-auth
   namespace: sso
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -43,13 +43,15 @@ spec:
               secretKeyRef:
                 name: google-client-secret
                 key: client-secret
+          - name: PROVIDER_GOOGLE_GOOGLE_CREDENTIALS
+            value: /creds/service_account.json
           - name: PROVIDER_GOOGLE_GOOGLE_IMPERSONATE
             valueFrom:
               secretKeyRef:
                 name: google-admin-email
                 key: email
-          - name: PROVIDER_GOOGLE_GOOGLE_CREDENTIALS
-            value: /creds/service_account.json
+          - name: PROVIDER_GOOGLE_GOOGLE_DOMAIN
+            value: wuvt.vt.edu
           - name: CLIENT_PROXY_ID
             valueFrom:
               secretKeyRef:
@@ -102,4 +104,3 @@ spec:
         - name: google-service-account
           secret:
             secretName: google-service-account
-
