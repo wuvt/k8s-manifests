@@ -5,14 +5,14 @@ metadata:
   namespace: sso
 data:
   upstream_configs.yml: |-
-    - service: files
-      default:
-        from: files.apps.wuvt.vt.edu
-        to: http://alexandria.wuvt.vt.edu/
     - service: eas
       default:
         from: eas.apps.wuvt.vt.edu
         to: http://dasdec.wuvt.vt.edu/
+    - service: files
+      default:
+        from: files.apps.wuvt.vt.edu
+        to: http://alexandria.wuvt.vt.edu/
     - service: kibana
       default:
         from: kibana.apps.wuvt.vt.edu
