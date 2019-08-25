@@ -13,3 +13,10 @@ data:
       default:
         from: eas.apps.wuvt.vt.edu
         to: http://dasdec.wuvt.vt.edu/
+    - service: kibana
+      default:
+        from: kibana.apps.wuvt.vt.edu
+        to: http://kibana.elk.svc.cluster.local:5601/
+        options:
+          allowed_groups:
+            - it@wuvt.vt.edu

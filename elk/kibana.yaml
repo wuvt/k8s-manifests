@@ -12,9 +12,7 @@ spec:
   - name: http
     protocol: TCP
     port: 5601
-    targetPort: 443
-  externalIPs:
-  - 192.168.0.164
+    targetPort: 80
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -32,7 +30,7 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana-oss:6.4.2
+        image: docker.elastic.co/kibana/kibana-oss:7.3.1
         env:
         - name: ELASTICSEARCH_URL
           value: http://elasticsearch.elk.svc.cluster.local:9200
@@ -47,7 +45,7 @@ spec:
               name: elasticsearch
               key: password
       - name: nginx
-        image: quay.io/wuvt/nginx-kibana:1.14
+        image: wuvt/nginx-kibana:latest
         ports:
         - containerPort: 80
         volumeMounts:

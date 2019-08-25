@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: elasticsearch
-        image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.4.2
+        image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.3.1
         env:
         - name: cluster.name
           value: wuvt-elk
@@ -42,7 +42,7 @@ spec:
         - name: elasticsearch-data
           mountPath: /usr/share/elasticsearch/data
       - name: nginx
-        image: quay.io/wuvt/nginx-elasticsearch:1.14
+        image: wuvt/nginx-elasticsearch:latest
         ports:
         - containerPort: 80
         volumeMounts:
