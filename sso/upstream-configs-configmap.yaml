@@ -9,3 +9,7 @@ data:
       default:
         from: files.apps.wuvt.vt.edu
         to: http://alexandria.wuvt.vt.edu/
+    - service: eas
+      default:
+        from: eas.apps.wuvt.vt.edu
+        to: http://dasdec.wuvt.vt.edu/
