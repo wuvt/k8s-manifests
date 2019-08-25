@@ -51,20 +51,10 @@ spec:
         volumeMounts:
         - name: nginx-auth
           mountPath: /etc/nginx/auth
-        - name: logstash-tls
-          mountPath: /data
       volumes:
       - name: nginx-auth
         secret:
           secretName: kibana-nginx-auth
-      - name: logstash-tls
-        secret:
-          secretName: logstash.tls
-          items:
-          - key: tls.crt
-            path: cert.pem
-          - key: tls.key
-            path: privkey.pem
       tolerations:
       - key: node-role.kubernetes.io/elk
         operator: Exists
