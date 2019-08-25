@@ -52,6 +52,8 @@ spec:
                 key: email
           - name: PROVIDER_GOOGLE_GOOGLE_DOMAIN
             value: wuvt.vt.edu
+          - name: PROVIDER_GOOGLE_GROUPCACHE_INTERVAL_REFRESH
+            value: 15m
           - name: CLIENT_PROXY_ID
             valueFrom:
               secretKeyRef:
