@@ -11,14 +11,10 @@ spec:
     app: trackman
     instance: stg
   ports:
-  - name: https
+  - name: http
     protocol: TCP
-    port: 7448
-    targetPort: 443
-  externalIPs:
-  - 192.168.0.246
-  - 192.168.0.247
-  - 192.168.0.248
+    port: 80
+    targetPort: 80
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -230,3 +226,24 @@ spec:
       - key: node-role.kubernetes.io/dbserver
         operator: Exists
         effect: NoSchedule
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: trackman-stg
+  namespace: staging
+  labels:
+    app: trackman
+    instance: stg
+spec:
+  tls:
+    - hosts:
+      - "trackman-stg.apps.wuvt.vt.edu"
+  rules:
+    - host: "trackman-stg.apps.wuvt.vt.edu"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: trackman-stg
+              servicePort: 80
