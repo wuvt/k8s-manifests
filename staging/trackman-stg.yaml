@@ -235,6 +235,8 @@ metadata:
   labels:
     app: trackman
     instance: stg
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '75'
 spec:
   tls:
     - hosts:
