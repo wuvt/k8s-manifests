@@ -1,24 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: impala
-    instance: prod
-  name: impala
-spec:
-  externalIPs:
-  - 192.168.0.246
-  - 192.168.0.247
-  - 192.168.0.248
-  ports:
-  - name: tcp-8011-5000-t5xgt
-    port: 8011
-    protocol: TCP
-    targetPort: 5000
-  selector:
-    app: impala
-    instance: prod
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -61,3 +40,40 @@ spec:
       - hostPath:
           path: /usr/share/zoneinfo/America/New_York
         name: tzinfo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: impala
+    instance: prod
+  name: impala
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: impala
+    instance: prod
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: impala
+  labels:
+    app: impala
+    instance: prod
+spec:
+  tls:
+    - hosts:
+      - "impala.apps.wuvt.vt.edu"
+  rules:
+    - host: "impala.apps.wuvt.vt.edu"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: impala
+              servicePort: 8080
