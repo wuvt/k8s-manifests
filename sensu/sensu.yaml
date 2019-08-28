@@ -62,7 +62,6 @@ metadata:
   name: sensu-backend
   namespace: sensu
 spec:
-  type: LoadBalancer
   selector:
     app: sensu-backend
   ports:
