@@ -237,7 +237,7 @@ metadata:
     instance: stg
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 10m
-    nginx.ingress.kubernetes.io/proxy-read-timeout: '75'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: 75s
 spec:
   tls:
     - hosts:
