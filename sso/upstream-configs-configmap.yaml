@@ -9,10 +9,14 @@ data:
       default:
         from: eas.apps.wuvt.vt.edu
         to: http://dasdec.wuvt.vt.edu/
+        options:
+          preserve_host: true
     - service: files
       default:
         from: files.apps.wuvt.vt.edu
         to: http://alexandria.wuvt.vt.edu/
+        options:
+          preserve_host: true
     - service: kibana
       default:
         from: kibana.apps.wuvt.vt.edu
@@ -20,6 +24,7 @@ data:
         options:
           allowed_groups:
             - it@wuvt.vt.edu
+          preserve_host: true
     - service: pload-fm
       default:
         from: playlists-fm.apps.wuvt.vt.edu
@@ -27,3 +32,4 @@ data:
         options:
           allowed_groups:
             - it@wuvt.vt.edu
+          preserve_host: true
