@@ -14,7 +14,6 @@ spec:
   - name: http
     protocol: TCP
     port: 80
-    targetPort: 80
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -48,13 +47,10 @@ spec:
       - name: nginx
         image: quay.io/wuvt/trackman-nginx:latest
         ports:
-        - containerPort: 443
+        - containerPort: 80
         volumeMounts:
         - name: trackman-stg-nginx-config
           mountPath: /etc/nginx/conf.d
-          readOnly: true
-        - name: trackman-stg-ssl
-          mountPath: /data/ssl
           readOnly: true
       volumes:
       - name: trackman-stg-config
@@ -63,15 +59,6 @@ spec:
       - name: trackman-stg-nginx-config
         secret:
           secretName: trackman-stg.nginx
-      - name: trackman-stg-ssl
-        secret:
-          secretName: trackman-stg.tls
-          items:
-          - key: tls.crt
-            path: cert.pem
-          - key: tls.key
-            path: privkey.pem
-            mode: 384
       - name: tzinfo
         hostPath:
           path: /usr/share/zoneinfo/America/New_York
