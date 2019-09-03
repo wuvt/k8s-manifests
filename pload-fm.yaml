@@ -77,3 +77,62 @@ spec:
             #backend:
             #  serviceName: pload-fm
             #  servicePort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pload-fm-redis
+  labels:
+    app: pload-redis
+    instance: fm
+spec:
+  selector:
+    app: pload-redis
+    instance: fm
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: pload-redis
+    instance: fm
+  name: pload-fm-redis
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pload-redis
+        instance: fm
+    spec:
+      containers:
+      - name: redis
+        image: redis:4-alpine
+        args:
+        - '--requirepass $(REDIS_PASSWORD)'
+        - '--rename-command CONFIG ""'
+        - '--appendonly yes'
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pload-fm-redis
+              key: password
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /media/local-storage/pload-fm-redis-data
+      nodeName: columbia
+      tolerations:
+      - key: node-role.kubernetes.io/dbserver
+        operator: Exists
+        effect: NoSchedule
