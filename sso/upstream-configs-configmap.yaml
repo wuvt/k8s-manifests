@@ -32,6 +32,7 @@ data:
         options:
           allowed_groups:
             - it@wuvt.vt.edu
+            - traffic-staff@wuvt.vt.edu
           preserve_host: true
           skip_auth_regex:
             - ^\/api\/next_track$
