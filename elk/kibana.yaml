@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana-oss:7.3.1
+        image: docker.elastic.co/kibana/kibana-oss:7.4.1
         env:
         - name: ELASTICSEARCH_URL
           value: http://elasticsearch.elk.svc.cluster.local:9200
