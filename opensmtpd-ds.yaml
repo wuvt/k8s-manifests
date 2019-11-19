@@ -1,21 +1,25 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
   labels:
-    app: opensmtpd
+    app: opensmtpd-ds
   name: opensmtpd
 spec:
-  replicas: 2
+  selector:
+    matchLabels:
+      app: opensmtpd-ds
   template:
     metadata:
       labels:
-        app: opensmtpd
+        app: opensmtpd-ds
     spec:
+      hostNetwork: true
       containers:
       - name: opensmtpd
         image: wuvt/opensmtpd:latest
         ports:
         - containerPort: 25
+          hostPort: 25
         volumeMounts:
         - name: opensmtpd-config
           subPath: smtpd.conf
@@ -41,17 +45,3 @@ spec:
           - key: tls.key
             path: privkey.pem
             mode: 384
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: opensmtpd
-  labels:
-    app: opensmtpd
-spec:
-  selector:
-    app: opensmtpd
-  ports:
-  - name: smtp
-    protocol: TCP
-    port: 25
