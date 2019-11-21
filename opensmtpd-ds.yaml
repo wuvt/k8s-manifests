@@ -29,9 +29,15 @@ spec:
           subPath: mailname
           mountPath: /etc/smtpd/mailname
           readOnly: true
+        - name: opensmtpd-config
+          subPath: sources
+          mountPath: /etc/smtpd/sources
+          readOnly: true
         - name: opensmtpd-tls
           mountPath: /etc/ssl/smtpd
           readOnly: true
+        - name: spool-smtpd
+          mountPath: /var/spool/smtpd
       volumes:
       - name: opensmtpd-config
         secret:
@@ -45,3 +51,6 @@ spec:
           - key: tls.key
             path: privkey.pem
             mode: 384
+      - name: spool-smtpd
+        hostPath:
+          path: /var/spool/smtpd
