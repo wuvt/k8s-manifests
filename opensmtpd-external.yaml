@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
-    app: opensmtpd-ds
-  name: opensmtpd
+    app: opensmtpd-external
+  name: opensmtpd-external
 spec:
   selector:
     matchLabels:
-      app: opensmtpd-ds
+      app: opensmtpd-external
   template:
     metadata:
       labels:
-        app: opensmtpd-ds
+        app: opensmtpd-external
     spec:
       hostNetwork: true
       containers:
@@ -53,4 +53,4 @@ spec:
             mode: 384
       - name: spool-smtpd
         hostPath:
-          path: /var/spool/smtpd
+          path: /var/spool/smtpd-external
