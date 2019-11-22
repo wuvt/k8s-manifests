@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: fetchmail
+spec:
+  schedule: '*/15 * * * *'
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: fetchmail
+            image: wuvt/fetchmail:latest
+            command:
+            - /bin/sh
+            - '-c'
+            - 'fetchmail --nodetach --nosyslog -f /etc/fetchmailrc || [ $? -eq 1 ]'
+            volumeMounts:
+            - name: fetchmail-config
+              subPath: fetchmailrc
+              mountPath: /etc/fetchmailrc
+              readOnly: true
+          volumes:
+          - name: fetchmail-config
+            secret:
+              defaultMode: 384
+              secretName: fetchmail
+          restartPolicy: OnFailure
