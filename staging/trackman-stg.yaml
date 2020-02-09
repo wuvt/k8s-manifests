@@ -33,16 +33,15 @@ spec:
     spec:
       containers:
       - name: trackman
-        image: quay.io/wuvt/trackman:latest
+        image: wuvt/trackman:latest
         env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json
+        - name: TZ
+          value: America/New_York
         volumeMounts:
         - name: trackman-stg-config
           mountPath: /data/config
-          readOnly: true
-        - name: tzinfo
-          mountPath: /etc/localtime
           readOnly: true
       - name: nginx
         image: quay.io/wuvt/trackman-nginx:latest
@@ -59,9 +58,6 @@ spec:
       - name: trackman-stg-nginx-config
         secret:
           secretName: trackman-stg.nginx
-      - name: tzinfo
-        hostPath:
-          path: /usr/share/zoneinfo/America/New_York
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -81,25 +77,21 @@ spec:
     spec:
       containers:
       - name: trackman
-        image: quay.io/wuvt/trackman:latest
+        image: wuvt/trackman:latest
         command: ["flask", "run-scheduler"]
         env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json
+        - name: TZ
+          value: America/New_York
         volumeMounts:
         - name: trackman-stg-config
           mountPath: /data/config
-          readOnly: true
-        - name: tzinfo
-          mountPath: /etc/localtime
           readOnly: true
       volumes:
       - name: trackman-stg-config
         secret:
           secretName: trackman-stg.config
-      - name: tzinfo
-        hostPath:
-          path: /usr/share/zoneinfo/America/New_York
 ---
 apiVersion: v1
 kind: Service
