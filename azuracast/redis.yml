@@ -29,5 +29,16 @@ spec:
         - name: azuracast-redis
           image: azuracast/azuracast_redis:latest
           ports:
-            - protocol: TCP
-              containerPort: 6379
+          - containerPort: 6379
+          volumes:
+          - name: azuracast-redis-data
+            mountPath: /data
+      volumes:
+      - name: azuracast-redis-data
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          path: /sensu/influxdb
+          user: k8s
+          secretRef:
+            name: ceph-k8s
