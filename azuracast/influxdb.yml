@@ -38,7 +38,7 @@ spec:
         cephfs:
           monitors:
           - 192.168.0.234:6789
-          path: /sensu/influxdb
+          path: /azuracast/influxdb
           user: k8s
           secretRef:
             name: ceph-k8s

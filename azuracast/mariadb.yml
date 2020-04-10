@@ -29,7 +29,15 @@ spec:
       - name: azuracast-db
         image: hub.docker.io/r/azuracast/azuracast_db:latest
         env:
-                ##TODO
+          - name: MYSQL_HOST
+            value: 
+          - name: MYSQL_USER
+            value: azuracast
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: azuracast
+                key: dbpw
         ports:
         - containerPort: 3306
         volumeMounts:

@@ -38,7 +38,16 @@ spec:
       - name: azuracast-web
         image: hub.docker.com/r/azuracast/azuracast_web_v2:latest
         env:
-           # TODO include environmental variable overrides
+          # TODO include environmental variable overrides
+          - name: MYSQL_HOST
+            value: 
+          - name: MYSQL_USER
+            value: azuracast
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: azuracast
+                key: dbpw
         ports:
         - containerPort: 80
         - containerPort: 443
@@ -55,4 +64,44 @@ spec:
         - name: backups
           mountPath: /var/azuracast/backups
       volumes:
-              # TODO ceph volumes here
+        # TODO ceph volumes here
+      - name: letsencrypt
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          path: /azuracast/letsencrypt
+          user: k8s
+          secretRef:
+            name: ceph-k8s
+      - name: www_data
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          path: /azuracast/www_data
+          user: k8s
+          secretRef:
+            name: ceph-k8s
+      - name: tmp_data
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          path: /azuracast/tmp_data
+          user: k8s
+          secretRef:
+            name: ceph-k8s
+      - name: sftpgo_data
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          path: /azuracast/sftpgo_data
+          user: k8s
+          secretRef:
+            name: ceph-k8s
+      - name: backups
+        cephfs:
+          monitors:
+          - 192.168.0.234:6789
+          path: /azuracast/backups
+          user: k8s
+          secretRef:
+            name: ceph-k8s
