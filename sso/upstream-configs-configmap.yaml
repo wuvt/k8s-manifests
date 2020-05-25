@@ -37,3 +37,14 @@ data:
           skip_auth_regex:
             - ^\/api\/next_track$
             - ^\/api\/underwriting$
+    - service: linx
+      default:
+        from: linx.apps.wuvt.vt.edu
+        to: http://linx.default.svc.cluster.local:8080/
+        options:
+          preserve_host: true
+          skip_auth_regex:
+            - ^\/[^\/]+$
+            - ^\/API\/$
+            - ^\/static\/
+          skip_request_signing: true

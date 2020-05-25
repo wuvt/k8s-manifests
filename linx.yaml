@@ -68,24 +68,3 @@ spec:
     protocol: TCP
     port: 8080
     targetPort: 8080
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: linx
-  labels:
-    app: linx
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: 25g
-spec:
-  tls:
-    - hosts:
-      - "linx.apps.wuvt.vt.edu"
-  rules:
-    - host: "linx.apps.wuvt.vt.edu"
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: linx
-              servicePort: 8080

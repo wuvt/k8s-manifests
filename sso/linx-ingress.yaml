@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: linx
+  namespace: sso
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 25g
+spec:
+  tls:
+    - secretName: sso-proxy-tls-secret
+      hosts:
+        - "linx.apps.wuvt.vt.edu"
+  rules:
+    - host: "linx.apps.wuvt.vt.edu"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: sso-proxy
+              servicePort: 80
