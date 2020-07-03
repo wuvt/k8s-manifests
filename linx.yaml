@@ -27,7 +27,7 @@ spec:
         - '-sitename=wuvtLinx'
         - '-siteurl=https://linx.apps.wuvt.vt.edu/'
         - '-allowhotlink'
-        - '-maxexpiry=604800'
+        - '-maxexpiry=2592000'
         - '-force-random-filename'
         ports:
         - containerPort: 8080
