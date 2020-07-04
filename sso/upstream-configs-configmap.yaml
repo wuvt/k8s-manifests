@@ -47,4 +47,5 @@ data:
             - ^\/[^\/]+$
             - ^\/API\/$
             - ^\/static\/
+            - ^\/selif\/
           skip_request_signing: true
