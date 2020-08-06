@@ -17,6 +17,7 @@ data:
         to: http://alexandria.wuvt.vt.edu/
         options:
           preserve_host: true
+          flush_interval: 5s
     - service: kibana
       default:
         from: kibana.apps.wuvt.vt.edu
@@ -37,6 +38,20 @@ data:
           skip_auth_regex:
             - ^\/api\/next_track$
             - ^\/api\/underwriting$
+          timeout: 30s
+    - service: pload-stg
+      default:
+        from: playlists-stg.apps.wuvt.vt.edu
+        to: http://pload-stg.staging.svc.cluster.local:8080/
+        options:
+          allowed_groups:
+            - it@wuvt.vt.edu
+            - traffic-staff@wuvt.vt.edu
+          preserve_host: true
+          skip_auth_regex:
+            - ^\/api\/next_track$
+            - ^\/api\/underwriting$
+          timeout: 60s
     - service: linx
       default:
         from: linx.apps.wuvt.vt.edu
@@ -49,3 +64,5 @@ data:
             - ^\/static\/
             - ^\/selif\/
           skip_request_signing: true
+          timeout: 30s
+          flush_interval: 5s
