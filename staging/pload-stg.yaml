@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pload-stg
+  namespace: staging
+  labels:
+    k8s.wuvt.vt.edu/app: pload-stg
+    app: pload
+    instance: stg
+spec:
+  selector:
+    app: pload
+    instance: stg
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+    targetPort: 5000
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pload-stg
+  namespace: staging
+  labels:
+    k8s.wuvt.vt.edu/app: pload-stg
+    app: pload
+    instance: stg
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        k8s.wuvt.vt.edu/app: pload-stg
+        app: pload
+        instance: stg
+    spec:
+      containers:
+      - name: pload
+        image: wuvt/pload:latest
+        env:
+        - name: APP_CONFIG_PATH
+          value: /data/config/config.json
+        volumeMounts:
+        - name: pload-stg-config
+          mountPath: /data/config
+          readOnly: true
+        - name: tzinfo
+          mountPath: /etc/localtime
+          readOnly: true
+      volumes:
+      - name: pload-stg-config
+        secret:
+          secretName: pload-stg.config
+      - name: tzinfo
+        hostPath:
+          path: /usr/share/zoneinfo/America/New_York
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: pload-stg
+  namespace: sso
+  labels:
+    k8s.wuvt.vt.edu/app: pload-stg
+  #  app: pload
+  #  instance: stg
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 10m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: 75s
+spec:
+  tls:
+    - hosts:
+      - "playlists-stg.apps.wuvt.vt.edu"
+  rules:
+    - host: "playlists-stg.apps.wuvt.vt.edu"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: sso-proxy
+              servicePort: 80
+            #backend:
+            #  serviceName: pload-stg
+            #  servicePort: 8080
