@@ -17,7 +17,7 @@ spec:
       - env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json
-        image: quay.io/wuvt/smuggler
+        image: ghcr.io/wuvt/smuggler
         imagePullPolicy: Always
         name: smuggler
         ports:
