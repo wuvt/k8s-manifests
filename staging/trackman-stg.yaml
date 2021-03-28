@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: trackman
-        image: wuvt/trackman:latest
+        image: ghcr.io/wuvt/trackman:latest
         env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json
@@ -44,7 +44,7 @@ spec:
           mountPath: /data/config
           readOnly: true
       - name: nginx
-        image: quay.io/wuvt/trackman-nginx:latest
+        image: ghcr.io/wuvt/trackman-nginx:latest
         ports:
         - containerPort: 80
         volumeMounts:

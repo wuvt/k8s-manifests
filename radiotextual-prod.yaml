@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: radiotextual
-        image: quay.io/wuvt/radiotextual:latest
+        image: ghcr.io/wuvt/radiotextual:latest
         env:
         - name: APP_CONFIG_PATH
           value: /data/config/config.json

@@ -42,7 +42,7 @@ spec:
           mountPath: /data/config
           readOnly: true
       - name: nginx
-        image: quay.io/wuvt/trackman-nginx:latest
+        image: ghcr.io/wuvt/trackman-nginx:latest
         ports:
         - containerPort: 443
         volumeMounts:
