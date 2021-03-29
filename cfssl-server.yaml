@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: cfssl-server
-        image: quay.io/wuvt/docker-cfssl:latest
+        image: ghcr.io/wuvt/cfssl:latest
         command:
         - multirootca
         - -tls-cert

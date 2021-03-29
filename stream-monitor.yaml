@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: stream-monitor
-        image: quay.io/wuvt/stream-monitor:latest
+        image: ghcr.io/wuvt/stream-monitor:latest
         volumeMounts:
         - name: stream-monitor-data
           mountPath: /data

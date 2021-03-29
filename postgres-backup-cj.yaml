@@ -10,7 +10,7 @@ spec:
         spec:
           containers:
           - name: postgres-backup
-            image: quay.io/wuvt/postgres-backup:latest
+            image: ghcr.io/wuvt/postgres-backup:latest
             env:
             - name: POSTGRES_SERVER
               valueFrom:
