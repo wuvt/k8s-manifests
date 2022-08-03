@@ -1,0 +1,5 @@
+manifests/
+apps/*.yaml
+
+secrets/*
+!secrets/*.dhall
