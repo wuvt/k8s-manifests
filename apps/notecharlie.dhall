@@ -1,5 +1,14 @@
 let kubernetes = ../kubernetes.dhall
 
+let storage = ../rook/storage.dhall
+
+let blockClaim =
+      storage.PersistentBlockClaim::{
+      , name = "notecharlie-pv-claim"
+      , appName = Some "notecharlie"
+      , size = "10Mi"
+      }
+
 let deployment =
       kubernetes.Deployment::{
       , metadata = kubernetes.ObjectMeta::{
@@ -22,13 +31,18 @@ let deployment =
                 , name = "notecharlie"
                 , volumeMounts = Some
                   [ kubernetes.VolumeMount::{
+                    , name = "notecharlie-data"
                     , mountPath = "/home/bot/.phenny"
+                    }
+                  , kubernetes.VolumeMount::{
                     , name = "notecharlie-config"
+                    , mountPath = "/home/bot/.phenny/default.py"
+                    , subPath = Some "default.py"
                     , readOnly = Some True
                     }
                   , kubernetes.VolumeMount::{
-                    , mountPath = "/etc/localtime"
                     , name = "tzinfo"
+                    , mountPath = "/etc/localtime"
                     , readOnly = Some True
                     }
                   ]
@@ -42,10 +56,16 @@ let deployment =
                   }
                 }
               , kubernetes.Volume::{
+                , name = "notecharlie-data"
+                , persistentVolumeClaim = Some kubernetes.PersistentVolumeClaimVolumeSource::{
+                  , claimName = "notecharlie-pv-claim"
+                  }
+                }
+              , kubernetes.Volume::{
+                , name = "tzinfo"
                 , hostPath = Some kubernetes.HostPathVolumeSource::{
                   , path = "/usr/share/zoneinfo/America/New_York"
                   }
-                , name = "tzinfo"
                 }
               ]
             }
@@ -53,4 +73,6 @@ let deployment =
         }
       }
 
-in  deployment
+in  [ kubernetes.Resource.PersistentVolumeClaim (storage.mkClaim blockClaim)
+    , kubernetes.Resource.Deployment deployment
+    ]

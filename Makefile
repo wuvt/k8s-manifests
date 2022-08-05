@@ -8,13 +8,16 @@ APPS := notecharlie
 SECRETS := notecharlie
 
 .PHONY: all
-all: apps secrets
+all: apps secrets rook
 
 .PHONY: apps
 apps: ${APPS:%=apps/%.yaml}
 
 .PHONY: secrets
 secrets: ${SECRETS:%=secrets/%.yaml}
+
+.PHONY: rook
+rook: rook/storageclass.yaml
 
 .PHONY: manifests
 manifests: all
@@ -27,11 +30,16 @@ manifests: all
 		cp secrets/$$SECRET.yaml ${MANIFESTDIR}/secret.$$SECRET.yaml; \
 		echo "cp secrets/$$SECRET.yaml ${MANIFESTDIR}/secret.$$SECRET.yaml"; \
 	done
+	@for ROOK in cluster common crds operator storageclass toolbox ; do \
+		cp rook/$$ROOK.yaml ${MANIFESTDIR}/rook.$$ROOK.yaml; \
+		echo "cp rooks/$$ROOK.yaml ${MANIFESTDIR}/rook.$$ROOK.yaml"; \
+	done
 
 .PHONY: clean
 clean:
 	rm -f ${APPS:%=apps/%.yaml}
 	rm -f ${SECRETS:%=secrets/%.yaml}
+	rm -f rook/storageclass.yaml
 	rm -rf ${MANIFESTDIR}
 
 .PHONY: format
@@ -49,4 +57,4 @@ hash:
 
 .SUFFIXES: .dhall .yaml
 .dhall.yaml:
-	${DHALL} ${DHALLFLAGS} --file $< > $@
+	${DHALL} ${DHALLFLAGS} --file $< --output $@

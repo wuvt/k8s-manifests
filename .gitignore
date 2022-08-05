@@ -1,5 +1,7 @@
 manifests/
 apps/*.yaml
 
+rook/storageclass.yaml
+
 secrets/*
 !secrets/*.dhall
