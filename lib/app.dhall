@@ -1,3 +1,5 @@
+let Prelude = ../Prelude.dhall
+
 let kubernetes = ../kubernetes.dhall
 
 let volumes = ./volumes.dhall
@@ -10,8 +12,13 @@ let App =
           , replicas : Natural
           , image : Text
           , volumes : List volumes.Volume.Type
+          , user : Optional Natural
           }
-      , default = { replicas = 1, volumes = [] : List volumes.Volume.Type }
+      , default =
+        { replicas = 1
+        , volumes = [] : List volumes.Volume.Type
+        , user = None Natural
+        }
       }
 
 let mkDeployment
@@ -50,6 +57,18 @@ let mkDeployment
                     kubernetes.Volume.Type
                     volumes.mkVolumeSource
                     app.volumes
+              , securityContext =
+                  Prelude.Optional.map
+                    Natural
+                    kubernetes.PodSecurityContext.Type
+                    ( \(user : Natural) ->
+                        kubernetes.PodSecurityContext::{
+                        , runAsUser = Some user
+                        , runAsGroup = Some user
+                        , fsGroup = Some user
+                        }
+                    )
+                    app.user
               }
             }
           }

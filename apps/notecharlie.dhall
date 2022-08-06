@@ -43,6 +43,7 @@ let app =
               lib.volumes.VolumeSource.TZInfo lib.volumes.TZInfoSource::{=}
           }
         ]
+      , user = Some 200
       }
 
 in  [ kubernetes.Resource.PersistentVolumeClaim

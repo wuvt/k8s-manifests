@@ -124,7 +124,7 @@ data:
   # ROOK_CSI_NFS_POD_LABELS: "key1=value1,key2=value2"
 
   # (Optional) CephCSI provisioner NodeAffinity (applied to both CephFS and RBD provisioner).
-  # CSI_PROVISIONER_NODE_AFFINITY: "role=storage-node; storage=rook, ceph"
+  CSI_PROVISIONER_NODE_AFFINITY: "node-role.kubernetes.io/storage-node="
   # (Optional) CephCSI provisioner tolerations list(applied to both CephFS and RBD provisioner).
   # Put here list of taints you want to tolerate in YAML format.
   # CSI provisioner would be best to start on the same nodes as other ceph daemons.

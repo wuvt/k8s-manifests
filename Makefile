@@ -60,5 +60,7 @@ hash:
 		printf "{} - "; dhall hash --file {}' \;
 
 .SUFFIXES: .dhall .yaml
-.dhall.yaml:
+.dhall.yaml: lib.dhall kubernetes.dhall rook.dhall
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
+
+lib.dhall: lib/app.dhall lib/storage.dhall lib/util.dhall lib/volumes.dhall
