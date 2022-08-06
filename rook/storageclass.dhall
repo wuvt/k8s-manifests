@@ -4,22 +4,20 @@ let kubernetes = ../kubernetes.dhall
 
 let rook = ../rook.dhall
 
-let typesUnion = < Kubernetes : kubernetes.Resource | Rook : rook.Resource >
-
-let parameters = ./parameters.dhall
+let blockStorage = (./blockStorage.dhall).pool
 
 let pool =
       rook.CephBlockPool::{
       , metadata = kubernetes.ObjectMeta::{
-        , name = Some "replicapool"
-        , namespace = Some parameters.namespace
+        , name = Some blockStorage.name
+        , namespace = Some blockStorage.namespace
         }
       , spec = rook.NamedBlockPoolSpec::{
-        , failureDomain = Some parameters.blockPoolFailureDomain
+        , failureDomain = Some blockStorage.failureDomain
         , replicated = Some rook.ReplicatedSpec::{
           , requireSafeReplicaSize = Some
-              (Prelude.Natural.greaterThan parameters.blockPoolSize 1)
-          , size = parameters.blockPoolSize
+              (Prelude.Natural.greaterThan blockStorage.replicas 1)
+          , size = blockStorage.replicas
           }
         }
       }
@@ -27,12 +25,12 @@ let pool =
 let storage =
       kubernetes.StorageClass::{
       , metadata = kubernetes.ObjectMeta::{
-        , name = Some parameters.blockStorageName
+        , name = Some blockStorage.storageName
         }
-      , provisioner = "${parameters.namespace}.rbd.csi.ceph.com"
+      , provisioner = "${blockStorage.namespace}.rbd.csi.ceph.com"
       , parameters = Some
           ( toMap
-              { clusterID = parameters.namespace
+              { clusterID = blockStorage.namespace
               , `csi.storage.k8s.io/controller-expand-secret-name` =
                   "rook-csi-rbd-provisioner"
               , `csi.storage.k8s.io/controller-expand-secret-namespace` =
@@ -41,11 +39,11 @@ let storage =
               , `csi.storage.k8s.io/node-stage-secret-name` =
                   "rook-csi-rbd-node"
               , `csi.storage.k8s.io/node-stage-secret-namespace` =
-                  parameters.namespace
+                  blockStorage.namespace
               , `csi.storage.k8s.io/provisioner-secret-name` =
                   "rook-csi-rbd-provisioner"
               , `csi.storage.k8s.io/provisioner-secret-namespace` =
-                  parameters.namespace
+                  blockStorage.namespace
               , imageFeatures = "layering"
               , imageFormat = "2"
               , pool = "replicapool"
@@ -54,6 +52,8 @@ let storage =
       , allowVolumeExpansion = Some True
       , reclaimPolicy = Some "Delete"
       }
+
+let typesUnion = < Kubernetes : kubernetes.Resource | Rook : rook.Resource >
 
 in  [ typesUnion.Rook (rook.Resource.CephBlockPool pool)
     , typesUnion.Kubernetes (kubernetes.Resource.StorageClass storage)

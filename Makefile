@@ -50,6 +50,10 @@ format:
 		then rm {}.bak; \
 		else echo "formatted {}"; mv {}.bak {}; fi' \;
 
+.PHONY: lint
+lint:
+	@find . -name \*.dhall -exec dhall lint --check {} +
+
 .PHONY: hash
 hash:
 	@find . -name \*.dhall -exec sh -c ' \

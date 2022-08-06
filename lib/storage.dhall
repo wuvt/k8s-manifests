@@ -2,7 +2,16 @@ let Prelude = ../Prelude.dhall
 
 let kubernetes = ../kubernetes.dhall
 
-let parameters = ./parameters.dhall
+let CephBlockPool =
+      { Type =
+          { name : Text
+          , storageName : Text
+          , namespace : Text
+          , failureDomain : Text
+          , replicas : Natural
+          }
+      , default = {=}
+      }
 
 let PersistentBlockClaim =
       { Type =
@@ -14,9 +23,12 @@ let PersistentBlockClaim =
       , default = { appName = None Text, accessModes = [ "ReadWriteOnce" ] }
       }
 
-let mkClaim
-    : PersistentBlockClaim.Type -> kubernetes.PersistentVolumeClaim.Type
-    = \(claim : PersistentBlockClaim.Type) ->
+let mkBlockStorageClaim
+    : CephBlockPool.Type ->
+      PersistentBlockClaim.Type ->
+        kubernetes.PersistentVolumeClaim.Type
+    = \(pool : CephBlockPool.Type) ->
+      \(claim : PersistentBlockClaim.Type) ->
         kubernetes.PersistentVolumeClaim::{
         , metadata = kubernetes.ObjectMeta::{
           , name = Some claim.name
@@ -24,11 +36,11 @@ let mkClaim
               Prelude.Optional.map
                 Text
                 (Prelude.Map.Type Text Text)
-                (\(app : Text) -> toMap { app })
+                (\(name : Text) -> toMap { `app.kubernetes.io/name` = name })
                 claim.appName
           }
         , spec = Some kubernetes.PersistentVolumeClaimSpec::{
-          , storageClassName = Some parameters.blockStorageName
+          , storageClassName = Some pool.storageName
           , accessModes = Some claim.accessModes
           , resources = Some kubernetes.ResourceRequirements::{
             , requests = Some (toMap { storage = claim.size })
@@ -36,4 +48,4 @@ let mkClaim
           }
         }
 
-in  { PersistentBlockClaim, mkClaim }
+in  { CephBlockPool, PersistentBlockClaim, mkBlockStorageClaim }
