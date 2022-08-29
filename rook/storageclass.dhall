@@ -4,9 +4,11 @@ let kubernetes = ../kubernetes.dhall
 
 let rook = ../rook.dhall
 
-let blockStorage = (./blockStorage.dhall).pool
+let blockStorage = (./blockStorage.dhall).store
 
-let pool =
+let objectStorage = (./objectStorage.dhall).store
+
+let blockPool =
       rook.CephBlockPool::{
       , metadata = kubernetes.ObjectMeta::{
         , name = Some blockStorage.name
@@ -22,7 +24,7 @@ let pool =
         }
       }
 
-let storage =
+let blockClass =
       kubernetes.StorageClass::{
       , metadata = kubernetes.ObjectMeta::{
         , name = Some blockStorage.storageName
@@ -31,11 +33,13 @@ let storage =
       , parameters = Some
           ( toMap
               { clusterID = blockStorage.namespace
+              , pool = blockStorage.name
+              , imageFormat = "2"
+              , imageFeatures = "layering"
               , `csi.storage.k8s.io/controller-expand-secret-name` =
                   "rook-csi-rbd-provisioner"
               , `csi.storage.k8s.io/controller-expand-secret-namespace` =
-                  "rook-ceph"
-              , `csi.storage.k8s.io/fstype` = "ext4"
+                  blockStorage.namespace
               , `csi.storage.k8s.io/node-stage-secret-name` =
                   "rook-csi-rbd-node"
               , `csi.storage.k8s.io/node-stage-secret-namespace` =
@@ -44,17 +48,67 @@ let storage =
                   "rook-csi-rbd-provisioner"
               , `csi.storage.k8s.io/provisioner-secret-namespace` =
                   blockStorage.namespace
-              , imageFeatures = "layering"
-              , imageFormat = "2"
-              , pool = "replicapool"
+              , `csi.storage.k8s.io/fstype` = "ext4"
               }
           )
       , allowVolumeExpansion = Some True
       , reclaimPolicy = Some "Delete"
       }
 
+let objectStore =
+      rook.CephObjectStore::{
+      , metadata = kubernetes.ObjectMeta::{
+        , name = Some objectStorage.name
+        , namespace = Some objectStorage.namespace
+        }
+      , spec = rook.ObjectStoreSpec::{
+        , metadataPool = Some rook.PoolSpec::{
+          , failureDomain = Some objectStorage.failureDomain
+          , replicated = Some rook.ReplicatedSpec::{
+            , requireSafeReplicaSize = Some
+                (Prelude.Natural.greaterThan objectStorage.replicas 1)
+            , size = objectStorage.replicas
+            }
+          }
+        , dataPool = Some rook.PoolSpec::{
+          , failureDomain = Some objectStorage.failureDomain
+          , replicated = Some rook.ReplicatedSpec::{
+            , requireSafeReplicaSize = Some
+                (Prelude.Natural.greaterThan objectStorage.replicas 1)
+            , size = objectStorage.replicas
+            }
+          }
+        , gateway = Some rook.GatewaySpec::{
+          , instances = Some objectStorage.gatewayInstances
+          }
+        , healthCheck = Some rook.BucketHealthCheckSpec::{
+          , bucket = Some rook.HealthCheckSpec::{
+            , disabled = Some False
+            , interval = Some objectStorage.healthCheckInterval
+            }
+          }
+        }
+      }
+
+let objectClass =
+      kubernetes.StorageClass::{
+      , metadata = kubernetes.ObjectMeta::{
+        , name = Some objectStorage.storageName
+        }
+      , provisioner = "${objectStorage.namespace}.rbd.csi.ceph.com"
+      , parameters = Some
+          ( toMap
+              { objectStoreName = objectStorage.name
+              , objectStoreNamespace = objectStorage.namespace
+              }
+          )
+      , reclaimPolicy = Some "Delete"
+      }
+
 let typesUnion = < Kubernetes : kubernetes.Resource | Rook : rook.Resource >
 
-in  [ typesUnion.Rook (rook.Resource.CephBlockPool pool)
-    , typesUnion.Kubernetes (kubernetes.Resource.StorageClass storage)
+in  [ typesUnion.Rook (rook.Resource.CephBlockPool blockPool)
+    , typesUnion.Kubernetes (kubernetes.Resource.StorageClass blockClass)
+    , typesUnion.Rook (rook.Resource.CephObjectStore objectStore)
+    , typesUnion.Kubernetes (kubernetes.Resource.StorageClass objectClass)
     ]

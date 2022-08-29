@@ -1,6 +1,6 @@
 let storage = ../lib/storage.dhall
 
-let pool =
+let store =
       storage.CephBlockPool::{
       , name = "replicapool"
       , storageName = "rook-ceph-block"
@@ -9,6 +9,6 @@ let pool =
       , replicas = 2
       }
 
-let mkClaim = storage.mkBlockStorageClaim pool
+let mkClaim = storage.mkBlockStorageClaim store
 
-in  { pool, mkClaim }
+in  { store, mkClaim }

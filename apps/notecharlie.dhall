@@ -6,8 +6,8 @@ let blockStorage = ../rook/blockStorage.dhall
 
 let secret = ../secrets/notecharlie.dhall
 
-let blockClaim =
-      lib.storage.PersistentBlockClaim::{
+let block =
+      lib.storage.Block::{
       , name = "notecharlie-pv-claim"
       , appName = Some "notecharlie"
       , size = "10Mi"
@@ -24,7 +24,7 @@ let app =
           , mountPath = "/home/bot/.phenny"
           , source =
               lib.volumes.VolumeSource.BlockStorage
-                lib.volumes.BlockStorageSource::{ claim = blockClaim }
+                lib.volumes.BlockStorageSource::{ block }
           }
         , lib.volumes.Volume::{
           , name = "notecharlie-config"
@@ -46,7 +46,6 @@ let app =
       , user = Some 200
       }
 
-in  [ kubernetes.Resource.PersistentVolumeClaim
-        (blockStorage.mkClaim blockClaim)
+in  [ kubernetes.Resource.PersistentVolumeClaim (blockStorage.mkClaim block)
     , kubernetes.Resource.Deployment (lib.app.mkDeployment app)
     ]

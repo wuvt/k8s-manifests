@@ -2,9 +2,11 @@ let Prelude = ../Prelude.dhall
 
 let kubernetes = ../kubernetes.dhall
 
-let volumes = ./volumes.dhall
+let storage = ./storage.dhall
 
 let util = ./util.dhall
+
+let volumes = ./volumes.dhall
 
 let App =
       { Type =
@@ -13,11 +15,13 @@ let App =
           , image : Text
           , volumes : List volumes.Volume.Type
           , user : Optional Natural
+          , bucket : Optional storage.Bucket.Type
           }
       , default =
         { replicas = 1
         , volumes = [] : List volumes.Volume.Type
         , user = None Natural
+        , bucket = None storage.Bucket.Type
         }
       }
 
@@ -49,6 +53,24 @@ let mkDeployment
                         kubernetes.VolumeMount.Type
                         volumes.mkVolumeMount
                         app.volumes
+                  , envFrom =
+                      Prelude.Optional.map
+                        storage.Bucket.Type
+                        (List kubernetes.EnvFromSource.Type)
+                        ( \(bucket : storage.Bucket.Type) ->
+                            [ kubernetes.EnvFromSource::{
+                              , configMapRef = Some kubernetes.ConfigMapEnvSource::{
+                                , name = Some bucket.name
+                                }
+                              }
+                            , kubernetes.EnvFromSource::{
+                              , secretRef = Some kubernetes.SecretEnvSource::{
+                                , name = Some bucket.name
+                                }
+                              }
+                            ]
+                        )
+                        app.bucket
                   }
                 ]
               , volumes =

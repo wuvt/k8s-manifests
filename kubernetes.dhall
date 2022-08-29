@@ -1,2 +1,2 @@
-https://raw.githubusercontent.com/dhall-lang/dhall-kubernetes/ece5035457eae0b60f63ea51a4e65db7e303a02b/1.22/package.dhall
-  sha256:53c03eb6a2cf118b3608f81253293993308a11f46b4463a18e376d343163bb21
+https://raw.githubusercontent.com/dhall-lang/dhall-kubernetes/753c7d04fb70845294095abb350cdadc79a94184/1.23/package.dhall
+  sha256:bc1e882fb24b98974d9c2210d2987ecbf661290f5c74b2dd6fa82562a5b41c5d

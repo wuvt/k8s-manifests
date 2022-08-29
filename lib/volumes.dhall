@@ -3,7 +3,7 @@ let kubernetes = ../kubernetes.dhall
 let storage = ./storage.dhall
 
 let BlockStorageSource =
-      { Type = { claim : storage.PersistentBlockClaim.Type }, default = {=} }
+      { Type = { block : storage.Block.Type }, default = {=} }
 
 let SecretSource = { Type = { secret : kubernetes.Secret.Type }, default = {=} }
 
@@ -36,7 +36,7 @@ let mkVolumeSource
                   kubernetes.Volume::{
                   , name = volume.name
                   , persistentVolumeClaim = Some kubernetes.PersistentVolumeClaimVolumeSource::{
-                    , claimName = bsVolume.claim.name
+                    , claimName = bsVolume.block.name
                     }
                   }
                 : kubernetes.Volume.Type
