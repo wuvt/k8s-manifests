@@ -4,6 +4,8 @@ let kubernetes = ../kubernetes.dhall
 
 let rook = ../rook.dhall
 
+let typesUnion = ./typesUnion.dhall
+
 let CephBlockPool =
       { Type =
           { name : Text
@@ -18,6 +20,7 @@ let CephBlockPool =
 let Block =
       { Type =
           { name : Text
+          , store : CephBlockPool.Type
           , appName : Optional Text
           , accessModes : List Text
           , size : Text
@@ -26,27 +29,32 @@ let Block =
       }
 
 let mkBlockStorageClaim
-    : CephBlockPool.Type -> Block.Type -> kubernetes.PersistentVolumeClaim.Type
-    = \(pool : CephBlockPool.Type) ->
-      \(claim : Block.Type) ->
-        kubernetes.PersistentVolumeClaim::{
-        , metadata = kubernetes.ObjectMeta::{
-          , name = Some claim.name
-          , labels =
-              Prelude.Optional.map
-                Text
-                (Prelude.Map.Type Text Text)
-                (\(name : Text) -> toMap { `app.kubernetes.io/name` = name })
-                claim.appName
-          }
-        , spec = Some kubernetes.PersistentVolumeClaimSpec::{
-          , storageClassName = Some pool.storageName
-          , accessModes = Some claim.accessModes
-          , resources = Some kubernetes.ResourceRequirements::{
-            , requests = Some (toMap { storage = claim.size })
-            }
-          }
-        }
+    : Block.Type -> typesUnion
+    = \(block : Block.Type) ->
+        let claim =
+              kubernetes.PersistentVolumeClaim::{
+              , metadata = kubernetes.ObjectMeta::{
+                , name = Some block.name
+                , labels =
+                    Prelude.Optional.map
+                      Text
+                      (Prelude.Map.Type Text Text)
+                      ( \(name : Text) ->
+                          toMap { `app.kubernetes.io/name` = name }
+                      )
+                      block.appName
+                }
+              , spec = Some kubernetes.PersistentVolumeClaimSpec::{
+                , storageClassName = Some block.store.storageName
+                , accessModes = Some block.accessModes
+                , resources = Some kubernetes.ResourceRequirements::{
+                  , requests = Some (toMap { storage = block.size })
+                  }
+                }
+              }
+
+        in  typesUnion.Kubernetes
+              (kubernetes.Resource.PersistentVolumeClaim claim)
 
 let CephObjectStore =
       { Type =
@@ -62,29 +70,34 @@ let CephObjectStore =
       }
 
 let Bucket =
-      { Type = { name : Text, appName : Optional Text }
+      { Type =
+          { name : Text, store : CephObjectStore.Type, appName : Optional Text }
       , default.appName = None Text
       }
 
 let mkObjectBucketClaim
-    : CephObjectStore.Type -> Bucket.Type -> rook.ObjectBucketClaim.Type
-    = \(store : CephObjectStore.Type) ->
-      \(claim : Bucket.Type) ->
-        rook.ObjectBucketClaim::{
-        , metadata = kubernetes.ObjectMeta::{
-          , name = Some claim.name
-          , labels =
-              Prelude.Optional.map
-                Text
-                (Prelude.Map.Type Text Text)
-                (\(name : Text) -> toMap { `app.kubernetes.io/name` = name })
-                claim.appName
-          }
-        , spec = Some rook.ObjectBucketClaimSpec::{
-          , storageClassName = store.storageName
-          , generateBucketName = Some claim.name
-          }
-        }
+    : Bucket.Type -> typesUnion
+    = \(bucket : Bucket.Type) ->
+        let claim =
+              rook.ObjectBucketClaim::{
+              , metadata = kubernetes.ObjectMeta::{
+                , name = Some bucket.name
+                , labels =
+                    Prelude.Optional.map
+                      Text
+                      (Prelude.Map.Type Text Text)
+                      ( \(name : Text) ->
+                          toMap { `app.kubernetes.io/name` = name }
+                      )
+                      bucket.appName
+                }
+              , spec = Some rook.ObjectBucketClaimSpec::{
+                , storageClassName = bucket.store.storageName
+                , generateBucketName = Some bucket.name
+                }
+              }
+
+        in  typesUnion.Rook (rook.Resource.ObjectBucketClaim claim)
 
 in  { CephBlockPool
     , Block

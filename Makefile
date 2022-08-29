@@ -63,4 +63,6 @@ hash:
 .dhall.yaml: lib.dhall kubernetes.dhall rook.dhall
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
 
-lib.dhall: lib/app.dhall lib/storage.dhall lib/util.dhall lib/volumes.dhall
+lib.dhall: \
+lib/app.dhall lib/storage.dhall lib/typesUnion.dhall lib/util.dhall \
+lib/volumes.dhall

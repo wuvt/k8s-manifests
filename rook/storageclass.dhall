@@ -4,9 +4,11 @@ let kubernetes = ../kubernetes.dhall
 
 let rook = ../rook.dhall
 
-let blockStorage = (./blockStorage.dhall).store
+let typesUnion = (../lib.dhall).typesUnion
 
-let objectStorage = (./objectStorage.dhall).store
+let blockStorage = ./blockStorage.dhall
+
+let objectStorage = ./objectStorage.dhall
 
 let blockPool =
       rook.CephBlockPool::{
@@ -104,8 +106,6 @@ let objectClass =
           )
       , reclaimPolicy = Some "Delete"
       }
-
-let typesUnion = < Kubernetes : kubernetes.Resource | Rook : rook.Resource >
 
 in  [ typesUnion.Rook (rook.Resource.CephBlockPool blockPool)
     , typesUnion.Kubernetes (kubernetes.Resource.StorageClass blockClass)

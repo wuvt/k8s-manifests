@@ -1,5 +1,3 @@
-let kubernetes = ../kubernetes.dhall
-
 let lib = ../lib.dhall
 
 let blockStorage = ../rook/blockStorage.dhall
@@ -9,6 +7,7 @@ let secret = ../secrets/notecharlie.dhall
 let block =
       lib.storage.Block::{
       , name = "notecharlie-pv-claim"
+      , store = blockStorage
       , appName = Some "notecharlie"
       , size = "10Mi"
       }
@@ -46,6 +45,4 @@ let app =
       , user = Some 200
       }
 
-in  [ kubernetes.Resource.PersistentVolumeClaim (blockStorage.mkClaim block)
-    , kubernetes.Resource.Deployment (lib.app.mkDeployment app)
-    ]
+in  [ lib.storage.mkBlockStorageClaim block, lib.app.mkDeployment app ]
