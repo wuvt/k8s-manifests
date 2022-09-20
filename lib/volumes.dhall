@@ -5,6 +5,8 @@ let storage = ./storage.dhall
 let BlockStorageSource =
       { Type = { block : storage.Block.Type }, default = {=} }
 
+let HostSource = { Type = { path : Text }, default = {=} }
+
 let SecretSource = { Type = { secret : kubernetes.Secret.Type }, default = {=} }
 
 let TZInfoSource =
@@ -12,6 +14,7 @@ let TZInfoSource =
 
 let VolumeSource =
       < BlockStorage : BlockStorageSource.Type
+      | Host : HostSource.Type
       | Secret : SecretSource.Type
       | TZInfo : TZInfoSource.Type
       >
@@ -33,31 +36,36 @@ let mkVolumeSource
         merge
           { BlockStorage =
               \(bsVolume : BlockStorageSource.Type) ->
-                  kubernetes.Volume::{
-                  , name = volume.name
-                  , persistentVolumeClaim = Some kubernetes.PersistentVolumeClaimVolumeSource::{
-                    , claimName = bsVolume.block.name
-                    }
+                kubernetes.Volume::{
+                , name = volume.name
+                , persistentVolumeClaim = Some kubernetes.PersistentVolumeClaimVolumeSource::{
+                  , claimName = bsVolume.block.name
                   }
-                : kubernetes.Volume.Type
+                }
+          , Host =
+              \(hVolume : HostSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , hostPath = Some kubernetes.HostPathVolumeSource::{
+                  , path = hVolume.path
+                  }
+                }
           , Secret =
               \(sVolume : SecretSource.Type) ->
-                  kubernetes.Volume::{
-                  , name = volume.name
-                  , secret = Some kubernetes.SecretVolumeSource::{
-                    , secretName = sVolume.secret.metadata.name
-                    }
+                kubernetes.Volume::{
+                , name = volume.name
+                , secret = Some kubernetes.SecretVolumeSource::{
+                  , secretName = sVolume.secret.metadata.name
                   }
-                : kubernetes.Volume.Type
+                }
           , TZInfo =
               \(tzVolume : TZInfoSource.Type) ->
-                  kubernetes.Volume::{
-                  , name = volume.name
-                  , hostPath = Some kubernetes.HostPathVolumeSource::{
-                    , path = "/usr/share/zoneinfo/${tzVolume.timezone}"
-                    }
+                kubernetes.Volume::{
+                , name = volume.name
+                , hostPath = Some kubernetes.HostPathVolumeSource::{
+                  , path = "/usr/share/zoneinfo/${tzVolume.timezone}"
                   }
-                : kubernetes.Volume.Type
+                }
           }
           volume.source
 
@@ -75,6 +83,7 @@ in  { Volume
     , mkVolumeMount
     , VolumeSource
     , BlockStorageSource
+    , HostSource
     , SecretSource
     , TZInfoSource
     , mkVolumeSource

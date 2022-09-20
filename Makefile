@@ -4,8 +4,8 @@ MANIFESTDIR := manifests
 DHALL := dhall-to-yaml-ng
 DHALLFLAGS := --documents
 
-APPS := notecharlie
-SECRETS := notecharlie
+APPS := notecharlie postgres
+SECRETS := notecharlie postgres
 
 .PHONY: all
 all: apps secrets rook
@@ -60,9 +60,9 @@ hash:
 		printf "{} - "; dhall hash --file {}' \;
 
 .SUFFIXES: .dhall .yaml
-.dhall.yaml: lib.dhall kubernetes.dhall rook.dhall
+.dhall.yaml: lib.dhall Prelude.dhall kubernetes.dhall rook.dhall
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
 
 lib.dhall: \
-lib/app.dhall lib/storage.dhall lib/typesUnion.dhall lib/util.dhall \
-lib/volumes.dhall
+lib/app.dhall lib/env.dhall lib/services.dhall lib/storage.dhall \
+lib/typesUnion.dhall lib/util.dhall lib/volumes.dhall
