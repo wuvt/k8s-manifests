@@ -1,5 +1,7 @@
 let app = ./lib/app.dhall
 
+let config = ./lib/config.dhall
+
 let env = ./lib/env.dhall
 
 let services = ./lib/services.dhall
@@ -12,4 +14,4 @@ let util = ./lib/util.dhall
 
 let volumes = ./lib/volumes.dhall
 
-in  { app, env, services, storage, typesUnion, util, volumes }
+in  { app, config, env, services, storage, typesUnion, util, volumes }

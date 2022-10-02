@@ -70,6 +70,12 @@ let mkDeployment
                               kubernetes.VolumeMount.Type
                               volumes.mkVolumeMount
                               app.volumes
+                        , livenessProbe =
+                            Prelude.Optional.concatMap
+                              services.Service
+                              kubernetes.Probe.Type
+                              services.mkLivenessProbe
+                              app.service
                         , args = util.listOptional Text app.args
                         , ports =
                             Prelude.Optional.map

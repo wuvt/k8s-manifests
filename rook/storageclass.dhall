@@ -4,11 +4,11 @@ let kubernetes = ../kubernetes.dhall
 
 let rook = ../rook.dhall
 
-let typesUnion = (../lib.dhall).typesUnion
-
 let blockStorage = ./blockStorage.dhall
 
 let objectStorage = ./objectStorage.dhall
+
+let typesUnion = (../lib.dhall).typesUnion
 
 let blockPool =
       rook.CephBlockPool::{

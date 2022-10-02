@@ -4,7 +4,7 @@ MANIFESTDIR := manifests
 DHALL := dhall-to-yaml-ng
 DHALLFLAGS := --documents
 
-APPS := notecharlie postgres
+APPS := linx notecharlie postgres
 SECRETS := notecharlie postgres
 
 .PHONY: all
@@ -64,5 +64,5 @@ hash:
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
 
 lib.dhall: \
-lib/app.dhall lib/env.dhall lib/services.dhall lib/storage.dhall \
-lib/typesUnion.dhall lib/util.dhall lib/volumes.dhall
+lib/app.dhall lib/config.dhall lib/env.dhall lib/services.dhall \
+lib/storage.dhall lib/typesUnion.dhall lib/util.dhall lib/volumes.dhall

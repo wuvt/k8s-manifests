@@ -1,9 +1,14 @@
 let kubernetes = ../kubernetes.dhall
 
+let config = ./config.dhall
+
 let storage = ./storage.dhall
 
 let BlockStorageSource =
       { Type = { block : storage.Block.Type }, default = {=} }
+
+let ConfigMapSource =
+      { Type = { configMap : config.ConfigMap.Type }, default = {=} }
 
 let HostSource = { Type = { path : Text }, default = {=} }
 
@@ -14,6 +19,7 @@ let TZInfoSource =
 
 let VolumeSource =
       < BlockStorage : BlockStorageSource.Type
+      | ConfigMap : ConfigMapSource.Type
       | Host : HostSource.Type
       | Secret : SecretSource.Type
       | TZInfo : TZInfoSource.Type
@@ -40,6 +46,14 @@ let mkVolumeSource
                 , name = volume.name
                 , persistentVolumeClaim = Some kubernetes.PersistentVolumeClaimVolumeSource::{
                   , claimName = bsVolume.block.name
+                  }
+                }
+          , ConfigMap =
+              \(cmVolume : ConfigMapSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , configMap = Some kubernetes.ConfigMapVolumeSource::{
+                  , name = Some cmVolume.configMap.name
                   }
                 }
           , Host =
@@ -83,6 +97,7 @@ in  { Volume
     , mkVolumeMount
     , VolumeSource
     , BlockStorageSource
+    , ConfigMapSource
     , HostSource
     , SecretSource
     , TZInfoSource
