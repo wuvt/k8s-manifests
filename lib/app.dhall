@@ -14,30 +14,125 @@ let util = ./util.dhall
 
 let volumes = ./volumes.dhall
 
-let App =
+let Container =
       { Type =
-          { name : Text
-          , replicas : Natural
+          { name : Optional Text
           , image : Text
+          , command : List Text
           , args : List Text
           , env : List env.Variable.Type
           , volumes : List volumes.Volume.Type
-          , user : Optional Natural
-          , nodeName : Optional Text
           , service : Optional services.Service
           , bucket : Optional storage.Bucket.Type
           }
       , default =
-        { replicas = 1
+        { name = None Text
+        , command = [] : List Text
         , args = [] : List Text
         , env = [] : List env.Variable.Type
         , volumes = [] : List volumes.Volume.Type
-        , user = None Natural
-        , nodeName = None Text
         , service = None services.Service
         , bucket = None storage.Bucket.Type
         }
       }
+
+let App =
+      { Type =
+          { name : Text
+          , instance : Optional Text
+          , replicas : Natural
+          , nodeName : Optional Text
+          , user : Optional Natural
+          , containers : List Container.Type
+          }
+      , default =
+        { instance = None Text
+        , replicas = 1
+        , nodeName = None Text
+        , user = None Natural
+        , containers = [] : List Container.Type
+        }
+      }
+
+let mkContainer
+    : Text -> Container.Type -> kubernetes.Container.Type
+    = \(appName : Text) ->
+      \(container : Container.Type) ->
+        kubernetes.Container::{
+        , image = Some container.image
+        , name = Prelude.Optional.default Text appName container.name
+        , volumeMounts =
+            util.mapEmpty
+              volumes.Volume.Type
+              kubernetes.VolumeMount.Type
+              volumes.mkVolumeMount
+              container.volumes
+        , livenessProbe =
+            Prelude.Optional.concatMap
+              services.Service
+              kubernetes.Probe.Type
+              services.mkLivenessProbe
+              container.service
+        , command = util.listOptional Text container.command
+        , args = util.listOptional Text container.args
+        , ports =
+            Prelude.Optional.map
+              services.Service
+              (List kubernetes.ContainerPort.Type)
+              services.mkContainerPorts
+              container.service
+        , env =
+            util.listOptional
+              kubernetes.EnvVar.Type
+              ( Prelude.List.map
+                  env.Variable.Type
+                  kubernetes.EnvVar.Type
+                  env.mkVariable
+                  container.env
+              )
+        , envFrom =
+            Prelude.Optional.map
+              storage.Bucket.Type
+              (List kubernetes.EnvFromSource.Type)
+              ( \(bucket : storage.Bucket.Type) ->
+                  [ kubernetes.EnvFromSource::{
+                    , configMapRef = Some kubernetes.ConfigMapEnvSource::{
+                      , name = Some bucket.name
+                      }
+                    }
+                  , kubernetes.EnvFromSource::{
+                    , secretRef = Some kubernetes.SecretEnvSource::{
+                      , name = Some bucket.name
+                      }
+                    }
+                  ]
+              )
+              container.bucket
+        }
+
+let mkLabels
+    : App.Type -> Prelude.Map.Type Text Text
+    = \(app : App.Type) ->
+          toMap { `app.kubernetes.io/name` = app.name }
+        # util.mapDefault
+            Text
+            (Prelude.Map.Type Text Text)
+            ( \(instance : Text) ->
+                toMap
+                  { `app.kubernetes.io/instance` = "${app.name}-${instance}" }
+            )
+            ([] : Prelude.Map.Type Text Text)
+            app.instance
+
+let mkFullName
+    : App.Type -> Text
+    = \(app : App.Type) ->
+        util.mapDefault
+          Text
+          Text
+          (\(instance : Text) -> "${app.name}-${instance}")
+          app.name
+          app.instance
 
 let mkDeployment
     : App.Type -> typesUnion
@@ -45,79 +140,38 @@ let mkDeployment
         let deployment =
               kubernetes.Deployment::{
               , metadata = kubernetes.ObjectMeta::{
-                , name = Some app.name
-                , labels = Some (toMap { `app.kubernetes.io/name` = app.name })
+                , name = Some (mkFullName app)
+                , labels = Some (mkLabels app)
                 }
               , spec = Some kubernetes.DeploymentSpec::{
                 , replicas = Some app.replicas
                 , selector = kubernetes.LabelSelector::{
-                  , matchLabels = Some
-                      (toMap { `app.kubernetes.io/name` = app.name })
+                  , matchLabels = Some (mkLabels app)
                   }
                 , template = kubernetes.PodTemplateSpec::{
                   , metadata = Some kubernetes.ObjectMeta::{
-                    , labels = Some
-                        (toMap { `app.kubernetes.io/name` = app.name })
+                    , labels = Some (mkLabels app)
                     }
                   , spec = Some kubernetes.PodSpec::{
                     , containers =
-                      [ kubernetes.Container::{
-                        , image = Some app.image
-                        , name = app.name
-                        , volumeMounts =
-                            util.mapEmpty
-                              volumes.Volume.Type
-                              kubernetes.VolumeMount.Type
-                              volumes.mkVolumeMount
-                              app.volumes
-                        , livenessProbe =
-                            Prelude.Optional.concatMap
-                              services.Service
-                              kubernetes.Probe.Type
-                              services.mkLivenessProbe
-                              app.service
-                        , args = util.listOptional Text app.args
-                        , ports =
-                            Prelude.Optional.map
-                              services.Service
-                              (List kubernetes.ContainerPort.Type)
-                              services.mkContainerPorts
-                              app.service
-                        , env =
-                            util.listOptional
-                              kubernetes.EnvVar.Type
-                              ( Prelude.List.map
-                                  env.Variable.Type
-                                  kubernetes.EnvVar.Type
-                                  env.mkVariable
-                                  app.env
-                              )
-                        , envFrom =
-                            Prelude.Optional.map
-                              storage.Bucket.Type
-                              (List kubernetes.EnvFromSource.Type)
-                              ( \(bucket : storage.Bucket.Type) ->
-                                  [ kubernetes.EnvFromSource::{
-                                    , configMapRef = Some kubernetes.ConfigMapEnvSource::{
-                                      , name = Some bucket.name
-                                      }
-                                    }
-                                  , kubernetes.EnvFromSource::{
-                                    , secretRef = Some kubernetes.SecretEnvSource::{
-                                      , name = Some bucket.name
-                                      }
-                                    }
-                                  ]
-                              )
-                              app.bucket
-                        }
-                      ]
+                        Prelude.List.map
+                          Container.Type
+                          kubernetes.Container.Type
+                          (mkContainer app.name)
+                          app.containers
                     , volumes =
                         util.mapEmpty
                           volumes.Volume.Type
                           kubernetes.Volume.Type
                           volumes.mkVolumeSource
-                          app.volumes
+                          ( Prelude.List.concatMap
+                              Container.Type
+                              volumes.Volume.Type
+                              ( \(container : Container.Type) ->
+                                  container.volumes
+                              )
+                              app.containers
+                          )
                     , nodeName = app.nodeName
                     , securityContext =
                         Prelude.Optional.map
@@ -145,16 +199,15 @@ let mkService
         let service =
               kubernetes.Service::{
               , metadata = kubernetes.ObjectMeta::{
-                , name = Some app.name
-                , labels = Some (toMap { `app.kubernetes.io/name` = app.name })
+                , name = Some (mkFullName app)
+                , labels = Some (mkLabels app)
                 }
               , spec = Some kubernetes.ServiceSpec::{
-                , selector = Some
-                    (toMap { `app.kubernetes.io/name` = app.name })
+                , selector = Some (mkLabels app)
                 , ports = Some (services.mkServicePorts service)
                 }
               }
 
         in  typesUnion.Kubernetes (kubernetes.Resource.Service service)
 
-in  { App, mkDeployment, mkService }
+in  { App, Container, mkDeployment, mkService }

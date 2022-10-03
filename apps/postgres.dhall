@@ -9,28 +9,32 @@ let app =
       lib.app.App::{
       , name = "postgres"
       , replicas = 1
-      , image = "ghcr.io/wuvt/postgres:latest"
-      , volumes =
-        [ lib.volumes.Volume::{
-          , name = "postgres-data"
-          , mountPath = "/var/lib/postgresql/data"
-          , source =
-              lib.volumes.VolumeSource.Host
-                lib.volumes.HostSource::{
-                , path = "/media/local-storage/postgres-data"
-                }
-          }
-        ]
-      , env =
-        [ lib.env.Variable::{
-          , name = "POSTGRES_PASSWORD"
-          , source =
-              lib.env.VariableSource.Secret
-                lib.env.SecretSource::{ secret, key = "password" }
-          }
-        ]
       , nodeName = Some "falcon9"
-      , service = Some service
+      , containers =
+        [ lib.app.Container::{
+          , image = "ghcr.io/wuvt/postgres:latest"
+          , volumes =
+            [ lib.volumes.Volume::{
+              , name = "postgres-data"
+              , mountPath = "/var/lib/postgresql/data"
+              , source =
+                  lib.volumes.VolumeSource.Host
+                    lib.volumes.HostSource::{
+                    , path = "/media/local-storage/postgres-data"
+                    }
+              }
+            ]
+          , env =
+            [ lib.env.Variable::{
+              , name = "POSTGRES_PASSWORD"
+              , source =
+                  lib.env.VariableSource.Secret
+                    lib.env.SecretSource::{ secret, key = "password" }
+              }
+            ]
+          , service = Some service
+          }
+        ]
       }
 
 in  [ lib.app.mkService service app, lib.app.mkDeployment app ]

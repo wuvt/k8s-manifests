@@ -20,4 +20,13 @@ let mapEmpty
         then  None (List b)
         else  Some (Prelude.List.map a b f xs)
 
-in  { listOptional, mapEmpty }
+let mapDefault
+    : forall (a : Type) -> forall (b : Type) -> (a -> b) -> b -> Optional a -> b
+    = \(a : Type) ->
+      \(b : Type) ->
+      \(f : a -> b) ->
+      \(d : b) ->
+      \(o : Optional a) ->
+        merge { Some = \(x : a) -> f x, None = d } o
+
+in  { listOptional, mapEmpty, mapDefault }

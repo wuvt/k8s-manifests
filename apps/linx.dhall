@@ -41,28 +41,32 @@ let app =
       lib.app.App::{
       , name = "linx"
       , replicas = 2
-      , image = "andreimarcu/linx-server:latest"
-      , args =
-        [ "-s3-endpoint=https://\$(BUCKET_HOST):\$(BUCKET_PORT)/"
-        , "-config /data/linx-server.conf"
-        ]
-      , volumes =
-        [ lib.volumes.Volume::{
-          , name = "linx-config"
-          , mountPath = "/data/linx-server.conf"
-          , subPath = Some "linx-server.conf"
-          , readOnly = Some True
-          , source =
-              lib.volumes.VolumeSource.ConfigMap
-                lib.volumes.ConfigMapSource::{ configMap }
+      , containers =
+        [ lib.app.Container::{
+          , image = "andreimarcu/linx-server:latest"
+          , args =
+            [ "-s3-endpoint=https://\$(BUCKET_HOST):\$(BUCKET_PORT)/"
+            , "-config /data/linx-server.conf"
+            ]
+          , volumes =
+            [ lib.volumes.Volume::{
+              , name = "linx-config"
+              , mountPath = "/data/linx-server.conf"
+              , subPath = Some "linx-server.conf"
+              , readOnly = Some True
+              , source =
+                  lib.volumes.VolumeSource.ConfigMap
+                    lib.volumes.ConfigMapSource::{ configMap }
+              }
+            ]
+          , service = Some service
+          , bucket = Some bucket
           }
         ]
-      , service = Some service
-      , bucket = Some bucket
       }
 
-in  [ lib.storage.mkObjectBucketClaim bucket
+in  [ lib.app.mkService service app
+    , lib.storage.mkObjectBucketClaim bucket
     , lib.config.mkConfigMap configMap
     , lib.app.mkDeployment app
-    , lib.app.mkService service app
     ]
