@@ -4,7 +4,7 @@ let objectStorage = ../rook/objectStorage.dhall
 
 let configMap =
       lib.config.ConfigMap::{
-      , name = "linx.config"
+      , name = "linx-config"
       , appName = Some "linx"
       , data = toMap
           { `linx-server.conf` =
@@ -26,16 +26,18 @@ let bucket =
       }
 
 let service =
-      lib.services.Service.HTTPService
-        lib.services.HTTPService::{
-        , port = 8080
-        , livenessProbe = Some lib.services.HTTPLivenessProbe::{
-          , path = "/"
-          , initialDelaySeconds = Some 60
-          , timeoutSeconds = Some 5
-          , failureThreshold = Some 5
-          }
+      lib.services.Service::{
+      , name = Some "http"
+      , port = 80
+      , livenessProbe = Some lib.services.HTTPLivenessProbe::{
+        , path = "/"
+        , initialDelaySeconds = Some 60
+        , timeoutSeconds = Some 5
+        , failureThreshold = Some 5
         }
+      }
+
+let ingress = lib.ingress.Ingress::{ service, host = "linx.apps.wuvt.vt.edu" }
 
 let app =
       lib.app.App::{
@@ -46,6 +48,7 @@ let app =
           , image = "andreimarcu/linx-server:latest"
           , args =
             [ "-s3-endpoint=https://\$(BUCKET_HOST):\$(BUCKET_PORT)/"
+            , "-s3-bucket=\$(BUCKET_NAME)"
             , "-config /data/linx-server.conf"
             ]
           , volumes =
@@ -66,6 +69,7 @@ let app =
       }
 
 in  [ lib.app.mkService service app
+    , lib.ingress.mkIngress ingress app
     , lib.storage.mkObjectBucketClaim bucket
     , lib.config.mkConfigMap configMap
     , lib.app.mkDeployment app

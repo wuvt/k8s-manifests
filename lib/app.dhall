@@ -22,7 +22,7 @@ let Container =
           , args : List Text
           , env : List env.Variable.Type
           , volumes : List volumes.Volume.Type
-          , service : Optional services.Service
+          , service : Optional services.Service.Type
           , bucket : Optional storage.Bucket.Type
           }
       , default =
@@ -31,7 +31,7 @@ let Container =
         , args = [] : List Text
         , env = [] : List env.Variable.Type
         , volumes = [] : List volumes.Volume.Type
-        , service = None services.Service
+        , service = None services.Service.Type
         , bucket = None storage.Bucket.Type
         }
       }
@@ -69,7 +69,7 @@ let mkContainer
               container.volumes
         , livenessProbe =
             Prelude.Optional.concatMap
-              services.Service
+              services.Service.Type
               kubernetes.Probe.Type
               services.mkLivenessProbe
               container.service
@@ -77,7 +77,7 @@ let mkContainer
         , args = util.listOptional Text container.args
         , ports =
             Prelude.Optional.map
-              services.Service
+              services.Service.Type
               (List kubernetes.ContainerPort.Type)
               services.mkContainerPorts
               container.service
@@ -193,8 +193,8 @@ let mkDeployment
         in  typesUnion.Kubernetes (kubernetes.Resource.Deployment deployment)
 
 let mkService
-    : services.Service -> App.Type -> typesUnion
-    = \(service : services.Service) ->
+    : services.Service.Type -> App.Type -> typesUnion
+    = \(service : services.Service.Type) ->
       \(app : App.Type) ->
         let service =
               kubernetes.Service::{
@@ -210,4 +210,4 @@ let mkService
 
         in  typesUnion.Kubernetes (kubernetes.Resource.Service service)
 
-in  { App, Container, mkDeployment, mkService }
+in  { App, Container, mkLabels, mkFullName, mkDeployment, mkService }

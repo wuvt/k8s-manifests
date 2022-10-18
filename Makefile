@@ -60,9 +60,11 @@ hash:
 		printf "{} - "; dhall hash --file {}' \;
 
 .SUFFIXES: .dhall .yaml
-.dhall.yaml: lib.dhall Prelude.dhall kubernetes.dhall rook.dhall
+.dhall.yaml: lib.dhall Prelude.dhall kubernetes.dhall rook.dhall \
+rook/blockStorage.dhall rook/objectStorage.dhall
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
 
 lib.dhall: \
-lib/app.dhall lib/config.dhall lib/env.dhall lib/services.dhall \
-lib/storage.dhall lib/typesUnion.dhall lib/util.dhall lib/volumes.dhall
+lib/app.dhall lib/config.dhall lib/env.dhall lib/ingress.dhall \
+lib/services.dhall lib/storage.dhall lib/typesUnion.dhall lib/util.dhall \
+lib/volumes.dhall

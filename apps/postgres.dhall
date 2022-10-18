@@ -2,8 +2,7 @@ let lib = ../lib.dhall
 
 let secret = ../secrets/postgres.dhall
 
-let service =
-      lib.services.Service.TCPService lib.services.TCPService::{ port = 5432 }
+let service = lib.services.Service::{ port = 5432 }
 
 let app =
       lib.app.App::{

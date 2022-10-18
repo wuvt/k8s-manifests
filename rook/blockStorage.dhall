@@ -1,7 +1,7 @@
 let storage = (../lib.dhall).storage
 
 in  storage.CephBlockPool::{
-    , name = "replicapool"
+    , name = "blockpool"
     , storageName = "rook-ceph-block"
     , namespace = "rook-ceph"
     , failureDomain = "osd"

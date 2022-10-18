@@ -2,6 +2,8 @@ let Prelude = ../Prelude.dhall
 
 let kubernetes = ../kubernetes.dhall
 
+let ServiceProtocol = < TCPService | UDPService >
+
 let HTTPLivenessProbe =
       { Type =
           { path : Text
@@ -20,121 +22,73 @@ let HTTPLivenessProbe =
         }
       }
 
-let HTTPService =
+let Service =
       { Type =
-          { port : Natural
+          { name : Optional Text
+          , protocol : ServiceProtocol
+          , port : Natural
           , targetPort : Optional Natural
           , livenessProbe : Optional HTTPLivenessProbe.Type
           }
       , default =
-        { port = 80
+        { name = None Text
+        , protocol = ServiceProtocol.TCPService
         , targetPort = None Natural
         , livenessProbe = None HTTPLivenessProbe.Type
         }
       }
 
-let TCPService =
-      { Type =
-          { name : Optional Text
-          , port : Natural
-          , targetPort : Optional Natural
-          }
-      , default = { name = None Text, targetPort = None Natural }
-      }
-
-let Service = < HTTPService : HTTPService.Type | TCPService : TCPService.Type >
-
 let mkLivenessProbe
-    : Service -> Optional kubernetes.Probe.Type
-    = \(service : Service) ->
-        merge
-          { HTTPService =
-              \(httpService : HTTPService.Type) ->
-                Prelude.Optional.map
-                  HTTPLivenessProbe.Type
-                  kubernetes.Probe.Type
-                  ( \(probe : HTTPLivenessProbe.Type) ->
-                      kubernetes.Probe::{
-                      , httpGet = Some kubernetes.HTTPGetAction::{
-                        , path = Some probe.path
-                        , port = kubernetes.NatOrString.Nat httpService.port
-                        , scheme = Some "HTTP"
-                        }
-                      , initialDelaySeconds = probe.initialDelaySeconds
-                      , periodSeconds = probe.periodSeconds
-                      , timeoutSeconds = probe.timeoutSeconds
-                      , successThreshold = probe.successThreshold
-                      , failureThreshold = probe.failureThreshold
-                      }
-                  )
-                  httpService.livenessProbe
-          , TCPService =
-              \(tcpService : TCPService.Type) -> None kubernetes.Probe.Type
-          }
-          service
+    : Service.Type -> Optional kubernetes.Probe.Type
+    = \(service : Service.Type) ->
+        Prelude.Optional.map
+          HTTPLivenessProbe.Type
+          kubernetes.Probe.Type
+          ( \(probe : HTTPLivenessProbe.Type) ->
+              kubernetes.Probe::{
+              , httpGet = Some kubernetes.HTTPGetAction::{
+                , path = Some probe.path
+                , port = kubernetes.NatOrString.Nat service.port
+                , scheme = Some "HTTP"
+                }
+              , initialDelaySeconds = probe.initialDelaySeconds
+              , periodSeconds = probe.periodSeconds
+              , timeoutSeconds = probe.timeoutSeconds
+              , successThreshold = probe.successThreshold
+              , failureThreshold = probe.failureThreshold
+              }
+          )
+          service.livenessProbe
 
 let mkContainerPorts =
-      \(service : Service) ->
-        [ merge
-            { HTTPService =
-                \(httpService : HTTPService.Type) ->
-                  kubernetes.ContainerPort::{
-                  , containerPort =
-                      Prelude.Optional.default
-                        Natural
-                        httpService.port
-                        httpService.targetPort
-                  }
-            , TCPService =
-                \(tcpService : TCPService.Type) ->
-                  kubernetes.ContainerPort::{
-                  , containerPort =
-                      Prelude.Optional.default
-                        Natural
-                        tcpService.port
-                        tcpService.targetPort
-                  }
-            }
-            service
+      \(service : Service.Type) ->
+        [ kubernetes.ContainerPort::{
+          , containerPort =
+              Prelude.Optional.default Natural service.port service.targetPort
+          }
         ]
 
 let mkServicePorts =
-      \(service : Service) ->
-        [ merge
-            { HTTPService =
-                \(httpService : HTTPService.Type) ->
-                  kubernetes.ServicePort::{
-                  , name = Some "http"
-                  , protocol = Some "TCP"
-                  , port = httpService.port
-                  , targetPort =
-                      Prelude.Optional.map
-                        Natural
-                        kubernetes.NatOrString
-                        (\(port : Natural) -> kubernetes.NatOrString.Nat port)
-                        httpService.targetPort
-                  }
-            , TCPService =
-                \(tcpService : TCPService.Type) ->
-                  kubernetes.ServicePort::{
-                  , name = tcpService.name
-                  , protocol = Some "TCP"
-                  , port = tcpService.port
-                  , targetPort =
-                      Prelude.Optional.map
-                        Natural
-                        kubernetes.NatOrString
-                        (\(port : Natural) -> kubernetes.NatOrString.Nat port)
-                        tcpService.targetPort
-                  }
-            }
-            service
+      \(service : Service.Type) ->
+        [ kubernetes.ServicePort::{
+          , name = service.name
+          , protocol =
+              merge
+                { TCPService = Some "TCP", UDPService = Some "UDP" }
+                service.protocol
+          , port = service.port
+          , targetPort =
+              Prelude.Optional.map
+                Natural
+                kubernetes.NatOrString
+                (\(port : Natural) -> kubernetes.NatOrString.Nat port)
+                service.targetPort
+          }
         ]
 
 in  { Service
-    , HTTPService
+    , ServiceProtocol
     , HTTPLivenessProbe
-    , TCPService
     , mkLivenessProbe
     , mkContainerPorts
     , mkServicePorts
