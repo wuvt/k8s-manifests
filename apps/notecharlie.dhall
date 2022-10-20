@@ -6,9 +6,8 @@ let secret = ../secrets/notecharlie.dhall
 
 let block =
       lib.storage.Block::{
-      , name = "notecharlie-pv-claim"
+      , name = "pv-claim"
       , store = blockStorage
-      , appName = Some "notecharlie"
       , size = "10Mi"
       }
 
@@ -21,32 +20,32 @@ let app =
         [ lib.app.Container::{
           , image = "ghcr.io/wuvt/notecharlie:latest"
           , volumes =
-            [ lib.volumes.Volume::{
+            [ lib.storage.Volume::{
               , name = "notecharlie-data"
               , mountPath = "/home/bot/.phenny"
               , source =
-                  lib.volumes.VolumeSource.BlockStorage
-                    lib.volumes.BlockStorageSource::{ block }
+                  lib.storage.VolumeSource.BlockStorage
+                    lib.storage.BlockStorageSource::{ block }
               }
-            , lib.volumes.Volume::{
+            , lib.storage.Volume::{
               , name = "notecharlie-config"
               , mountPath = "/home/bot/.phenny/default.py"
               , subPath = Some "default.py"
               , readOnly = Some True
               , source =
-                  lib.volumes.VolumeSource.Secret
-                    lib.volumes.SecretSource::{ secret }
+                  lib.storage.VolumeSource.Secret
+                    lib.storage.SecretSource::{ secret }
               }
-            , lib.volumes.Volume::{
+            , lib.storage.Volume::{
               , name = "tzinfo"
               , mountPath = "/etc/localtime"
               , readOnly = Some True
               , source =
-                  lib.volumes.VolumeSource.TZInfo lib.volumes.TZInfoSource::{=}
+                  lib.storage.VolumeSource.TZInfo lib.storage.TZInfoSource::{=}
               }
             ]
           }
         ]
       }
 
-in  [ lib.storage.mkBlockStorageClaim block, lib.app.mkDeployment app ]
+in  [ lib.mkBlockStorageClaim block app, lib.mkDeployment app ]

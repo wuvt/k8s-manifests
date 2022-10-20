@@ -86,10 +86,13 @@ let mkServicePorts =
           }
         ]
 
+let Ingress = { Type = { service : Service.Type, host : Text }, default = {=} }
+
 in  { Service
     , ServiceProtocol
     , HTTPLivenessProbe
     , mkLivenessProbe
     , mkContainerPorts
     , mkServicePorts
+    , Ingress
     }

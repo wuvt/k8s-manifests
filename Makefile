@@ -65,6 +65,5 @@ rook/blockStorage.dhall rook/objectStorage.dhall
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
 
 lib.dhall: \
-lib/app.dhall lib/config.dhall lib/env.dhall lib/ingress.dhall \
-lib/services.dhall lib/storage.dhall lib/typesUnion.dhall lib/util.dhall \
-lib/volumes.dhall
+lib/app.dhall lib/networking.dhall lib/storage.dhall lib/typesUnion.dhall \
+lib/util.dhall

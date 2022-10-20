@@ -2,9 +2,21 @@ let Prelude = ../Prelude.dhall
 
 let kubernetes = ../kubernetes.dhall
 
-let rook = ../rook.dhall
+let CephObjectStore =
+      { Type =
+          { name : Text
+          , storageName : Text
+          , namespace : Text
+          , failureDomain : Text
+          , replicas : Natural
+          , gatewayInstances : Natural
+          , healthCheckInterval : Text
+          }
+      , default = {=}
+      }
 
-let typesUnion = ./typesUnion.dhall
+let Bucket =
+      { Type = { name : Text, store : CephObjectStore.Type }, default = {=} }
 
 let CephBlockPool =
       { Type =
@@ -21,88 +33,117 @@ let Block =
       { Type =
           { name : Text
           , store : CephBlockPool.Type
-          , appName : Optional Text
           , accessModes : List Text
           , size : Text
           }
-      , default = { appName = None Text, accessModes = [ "ReadWriteOnce" ] }
+      , default.accessModes = [ "ReadWriteOnce" ]
       }
 
-let mkBlockStorageClaim
-    : Block.Type -> typesUnion
-    = \(block : Block.Type) ->
-        let claim =
-              kubernetes.PersistentVolumeClaim::{
-              , metadata = kubernetes.ObjectMeta::{
-                , name = Some block.name
-                , labels =
-                    Prelude.Optional.map
-                      Text
-                      (Prelude.Map.Type Text Text)
-                      ( \(name : Text) ->
-                          toMap { `app.kubernetes.io/name` = name }
-                      )
-                      block.appName
-                }
-              , spec = Some kubernetes.PersistentVolumeClaimSpec::{
-                , storageClassName = Some block.store.storageName
-                , accessModes = Some block.accessModes
-                , resources = Some kubernetes.ResourceRequirements::{
-                  , requests = Some (toMap { storage = block.size })
-                  }
-                }
-              }
+let ConfigMap =
+      { Type = { name : Text, data : Prelude.Map.Type Text Text }
+      , default.data = [] : Prelude.Map.Type Text Text
+      }
 
-        in  typesUnion.Kubernetes
-              (kubernetes.Resource.PersistentVolumeClaim claim)
+let BlockStorageSource = { Type = { block : Block.Type }, default = {=} }
 
-let CephObjectStore =
+let ConfigMapSource = { Type = { configMap : ConfigMap.Type }, default = {=} }
+
+let HostSource = { Type = { path : Text }, default = {=} }
+
+let SecretSource = { Type = { secret : kubernetes.Secret.Type }, default = {=} }
+
+let TZInfoSource =
+      { Type = { timezone : Text }, default.timezone = "America/New_York" }
+
+let VolumeSource =
+      < BlockStorage : BlockStorageSource.Type
+      | ConfigMap : ConfigMapSource.Type
+      | Host : HostSource.Type
+      | Secret : SecretSource.Type
+      | TZInfo : TZInfoSource.Type
+      >
+
+let Volume =
       { Type =
           { name : Text
-          , storageName : Text
-          , namespace : Text
-          , failureDomain : Text
-          , replicas : Natural
-          , gatewayInstances : Natural
-          , healthCheckInterval : Text
+          , mountPath : Text
+          , subPath : Optional Text
+          , readOnly : Optional Bool
+          , source : VolumeSource
           }
-      , default = {=}
+      , default = { subPath = None Text, readOnly = None Bool }
       }
 
-let Bucket =
-      { Type =
-          { name : Text, store : CephObjectStore.Type, appName : Optional Text }
-      , default.appName = None Text
-      }
-
-let mkObjectBucketClaim
-    : Bucket.Type -> typesUnion
-    = \(bucket : Bucket.Type) ->
-        let claim =
-              rook.ObjectBucketClaim::{
-              , metadata = kubernetes.ObjectMeta::{
-                , name = Some bucket.name
-                , labels =
-                    Prelude.Optional.map
-                      Text
-                      (Prelude.Map.Type Text Text)
-                      ( \(name : Text) ->
-                          toMap { `app.kubernetes.io/name` = name }
-                      )
-                      bucket.appName
+let mkVolumeSource
+    : Text -> Volume.Type -> kubernetes.Volume.Type
+    = \(appName : Text) ->
+      \(volume : Volume.Type) ->
+        merge
+          { BlockStorage =
+              \(bsVolume : BlockStorageSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , persistentVolumeClaim = Some kubernetes.PersistentVolumeClaimVolumeSource::{
+                  , claimName = "${appName}-${bsVolume.block.name}"
+                  }
                 }
-              , spec = Some rook.ObjectBucketClaimSpec::{
-                , storageClassName = bucket.store.storageName
-                , generateBucketName = Some bucket.name
+          , ConfigMap =
+              \(cmVolume : ConfigMapSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , configMap = Some kubernetes.ConfigMapVolumeSource::{
+                  , name = Some "${appName}-${cmVolume.configMap.name}"
+                  }
                 }
-              }
+          , Host =
+              \(hVolume : HostSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , hostPath = Some kubernetes.HostPathVolumeSource::{
+                  , path = hVolume.path
+                  }
+                }
+          , Secret =
+              \(sVolume : SecretSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , secret = Some kubernetes.SecretVolumeSource::{
+                  , secretName = sVolume.secret.metadata.name
+                  }
+                }
+          , TZInfo =
+              \(tzVolume : TZInfoSource.Type) ->
+                kubernetes.Volume::{
+                , name = volume.name
+                , hostPath = Some kubernetes.HostPathVolumeSource::{
+                  , path = "/usr/share/zoneinfo/${tzVolume.timezone}"
+                  }
+                }
+          }
+          volume.source
 
-        in  typesUnion.Rook (rook.Resource.ObjectBucketClaim claim)
+let mkVolumeMount
+    : Volume.Type -> kubernetes.VolumeMount.Type
+    = \(volume : Volume.Type) ->
+        kubernetes.VolumeMount::{
+        , name = volume.name
+        , mountPath = volume.mountPath
+        , subPath = volume.subPath
+        , readOnly = volume.readOnly
+        }
 
-in  { CephBlockPool
-    , Block
-    , mkBlockStorageClaim
-    , CephObjectStore
+in  { CephObjectStore
     , Bucket
-    , mkObjectBucketClaim
+    , CephBlockPool
+    , Block
+    , ConfigMap
+    , Volume
+    , VolumeSource
+    , BlockStorageSource
+    , ConfigMapSource
+    , HostSource
+    , SecretSource
+    , TZInfoSource
+    , mkVolumeSource
+    , mkVolumeMount
     }

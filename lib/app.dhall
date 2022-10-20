@@ -2,17 +2,40 @@ let Prelude = ../Prelude.dhall
 
 let kubernetes = ../kubernetes.dhall
 
-let env = ./env.dhall
-
-let services = ./services.dhall
+let networking = ./networking.dhall
 
 let storage = ./storage.dhall
 
-let typesUnion = ./typesUnion.dhall
-
 let util = ./util.dhall
 
-let volumes = ./volumes.dhall
+let SecretSource =
+      { Type = { secret : kubernetes.Secret.Type, key : Text }, default = {=} }
+
+let VariableSource = < Value : Text | Secret : SecretSource.Type >
+
+let Variable =
+      { Type = { name : Text, source : VariableSource }, default = {=} }
+
+let mkVariable
+    : Variable.Type -> kubernetes.EnvVar.Type
+    = \(variable : Variable.Type) ->
+        merge
+          { Value =
+              \(value : Text) ->
+                kubernetes.EnvVar::{ name = variable.name, value = Some value }
+          , Secret =
+              \(secret : SecretSource.Type) ->
+                kubernetes.EnvVar::{
+                , name = variable.name
+                , valueFrom = Some kubernetes.EnvVarSource::{
+                  , secretKeyRef = Some kubernetes.SecretKeySelector::{
+                    , name = secret.secret.metadata.name
+                    , key = secret.key
+                    }
+                  }
+                }
+          }
+          variable.source
 
 let Container =
       { Type =
@@ -20,18 +43,18 @@ let Container =
           , image : Text
           , command : List Text
           , args : List Text
-          , env : List env.Variable.Type
-          , volumes : List volumes.Volume.Type
-          , service : Optional services.Service.Type
+          , env : List Variable.Type
+          , volumes : List storage.Volume.Type
+          , service : Optional networking.Service.Type
           , bucket : Optional storage.Bucket.Type
           }
       , default =
         { name = None Text
         , command = [] : List Text
         , args = [] : List Text
-        , env = [] : List env.Variable.Type
-        , volumes = [] : List volumes.Volume.Type
-        , service = None services.Service.Type
+        , env = [] : List Variable.Type
+        , volumes = [] : List storage.Volume.Type
+        , service = None networking.Service.Type
         , bucket = None storage.Bucket.Type
         }
       }
@@ -53,62 +76,6 @@ let App =
         , containers = [] : List Container.Type
         }
       }
-
-let mkContainer
-    : Text -> Container.Type -> kubernetes.Container.Type
-    = \(appName : Text) ->
-      \(container : Container.Type) ->
-        kubernetes.Container::{
-        , image = Some container.image
-        , name = Prelude.Optional.default Text appName container.name
-        , volumeMounts =
-            util.mapEmpty
-              volumes.Volume.Type
-              kubernetes.VolumeMount.Type
-              volumes.mkVolumeMount
-              container.volumes
-        , livenessProbe =
-            Prelude.Optional.concatMap
-              services.Service.Type
-              kubernetes.Probe.Type
-              services.mkLivenessProbe
-              container.service
-        , command = util.listOptional Text container.command
-        , args = util.listOptional Text container.args
-        , ports =
-            Prelude.Optional.map
-              services.Service.Type
-              (List kubernetes.ContainerPort.Type)
-              services.mkContainerPorts
-              container.service
-        , env =
-            util.listOptional
-              kubernetes.EnvVar.Type
-              ( Prelude.List.map
-                  env.Variable.Type
-                  kubernetes.EnvVar.Type
-                  env.mkVariable
-                  container.env
-              )
-        , envFrom =
-            Prelude.Optional.map
-              storage.Bucket.Type
-              (List kubernetes.EnvFromSource.Type)
-              ( \(bucket : storage.Bucket.Type) ->
-                  [ kubernetes.EnvFromSource::{
-                    , configMapRef = Some kubernetes.ConfigMapEnvSource::{
-                      , name = Some bucket.name
-                      }
-                    }
-                  , kubernetes.EnvFromSource::{
-                    , secretRef = Some kubernetes.SecretEnvSource::{
-                      , name = Some bucket.name
-                      }
-                    }
-                  ]
-              )
-              container.bucket
-        }
 
 let mkLabels
     : App.Type -> Prelude.Map.Type Text Text
@@ -134,80 +101,69 @@ let mkFullName
           app.name
           app.instance
 
-let mkDeployment
-    : App.Type -> typesUnion
-    = \(app : App.Type) ->
-        let deployment =
-              kubernetes.Deployment::{
-              , metadata = kubernetes.ObjectMeta::{
-                , name = Some (mkFullName app)
-                , labels = Some (mkLabels app)
-                }
-              , spec = Some kubernetes.DeploymentSpec::{
-                , replicas = Some app.replicas
-                , selector = kubernetes.LabelSelector::{
-                  , matchLabels = Some (mkLabels app)
-                  }
-                , template = kubernetes.PodTemplateSpec::{
-                  , metadata = Some kubernetes.ObjectMeta::{
-                    , labels = Some (mkLabels app)
+let mkContainer
+    : Text -> Container.Type -> kubernetes.Container.Type
+    = \(appName : Text) ->
+      \(container : Container.Type) ->
+        kubernetes.Container::{
+        , image = Some container.image
+        , name = Prelude.Optional.default Text appName container.name
+        , volumeMounts =
+            util.mapEmpty
+              storage.Volume.Type
+              kubernetes.VolumeMount.Type
+              storage.mkVolumeMount
+              container.volumes
+        , livenessProbe =
+            Prelude.Optional.concatMap
+              networking.Service.Type
+              kubernetes.Probe.Type
+              networking.mkLivenessProbe
+              container.service
+        , command = util.listOptional Text container.command
+        , args = util.listOptional Text container.args
+        , ports =
+            Prelude.Optional.map
+              networking.Service.Type
+              (List kubernetes.ContainerPort.Type)
+              networking.mkContainerPorts
+              container.service
+        , env =
+            util.listOptional
+              kubernetes.EnvVar.Type
+              ( Prelude.List.map
+                  Variable.Type
+                  kubernetes.EnvVar.Type
+                  mkVariable
+                  container.env
+              )
+        , envFrom =
+            Prelude.Optional.map
+              storage.Bucket.Type
+              (List kubernetes.EnvFromSource.Type)
+              ( \(bucket : storage.Bucket.Type) ->
+                  [ kubernetes.EnvFromSource::{
+                    , configMapRef = Some kubernetes.ConfigMapEnvSource::{
+                      , name = Some "${appName}-${bucket.name}"
+                      }
                     }
-                  , spec = Some kubernetes.PodSpec::{
-                    , containers =
-                        Prelude.List.map
-                          Container.Type
-                          kubernetes.Container.Type
-                          (mkContainer app.name)
-                          app.containers
-                    , volumes =
-                        util.mapEmpty
-                          volumes.Volume.Type
-                          kubernetes.Volume.Type
-                          volumes.mkVolumeSource
-                          ( Prelude.List.concatMap
-                              Container.Type
-                              volumes.Volume.Type
-                              ( \(container : Container.Type) ->
-                                  container.volumes
-                              )
-                              app.containers
-                          )
-                    , nodeName = app.nodeName
-                    , securityContext =
-                        Prelude.Optional.map
-                          Natural
-                          kubernetes.PodSecurityContext.Type
-                          ( \(user : Natural) ->
-                              kubernetes.PodSecurityContext::{
-                              , runAsUser = Some user
-                              , runAsGroup = Some user
-                              , fsGroup = Some user
-                              }
-                          )
-                          app.user
+                  , kubernetes.EnvFromSource::{
+                    , secretRef = Some kubernetes.SecretEnvSource::{
+                      , name = Some "${appName}-${bucket.name}"
+                      }
                     }
-                  }
-                }
-              }
+                  ]
+              )
+              container.bucket
+        }
 
-        in  typesUnion.Kubernetes (kubernetes.Resource.Deployment deployment)
-
-let mkService
-    : services.Service.Type -> App.Type -> typesUnion
-    = \(service : services.Service.Type) ->
-      \(app : App.Type) ->
-        let service =
-              kubernetes.Service::{
-              , metadata = kubernetes.ObjectMeta::{
-                , name = Some (mkFullName app)
-                , labels = Some (mkLabels app)
-                }
-              , spec = Some kubernetes.ServiceSpec::{
-                , selector = Some (mkLabels app)
-                , ports = Some (services.mkServicePorts service)
-                }
-              }
-
-        in  typesUnion.Kubernetes (kubernetes.Resource.Service service)
-
-in  { App, Container, mkLabels, mkFullName, mkDeployment, mkService }
+in  { App
+    , mkLabels
+    , mkFullName
+    , Container
+    , mkContainer
+    , Variable
+    , mkVariable
+    , VariableSource
+    , SecretSource
+    }

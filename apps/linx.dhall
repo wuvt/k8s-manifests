@@ -3,9 +3,8 @@ let lib = ../lib.dhall
 let objectStorage = ../rook/objectStorage.dhall
 
 let configMap =
-      lib.config.ConfigMap::{
-      , name = "linx-config"
-      , appName = Some "linx"
+      lib.storage.ConfigMap::{
+      , name = "config"
       , data = toMap
           { `linx-server.conf` =
               ''
@@ -18,18 +17,13 @@ let configMap =
           }
       }
 
-let bucket =
-      lib.storage.Bucket::{
-      , name = "linx-bucket"
-      , store = objectStorage
-      , appName = Some "linx"
-      }
+let bucket = lib.storage.Bucket::{ name = "bucket", store = objectStorage }
 
 let service =
-      lib.services.Service::{
+      lib.networking.Service::{
       , name = Some "http"
       , port = 8080
-      , livenessProbe = Some lib.services.HTTPLivenessProbe::{
+      , livenessProbe = Some lib.networking.HTTPLivenessProbe::{
         , path = "/"
         , initialDelaySeconds = Some 60
         , timeoutSeconds = Some 5
@@ -37,7 +31,8 @@ let service =
         }
       }
 
-let ingress = lib.ingress.Ingress::{ service, host = "linx.apps.wuvt.vt.edu" }
+let ingress =
+      lib.networking.Ingress::{ service, host = "linx.apps.wuvt.vt.edu" }
 
 let app =
       lib.app.App::{
@@ -52,14 +47,14 @@ let app =
             , "-config=/data/linx-server.conf"
             ]
           , volumes =
-            [ lib.volumes.Volume::{
+            [ lib.storage.Volume::{
               , name = "linx-config"
               , mountPath = "/data/linx-server.conf"
               , subPath = Some "linx-server.conf"
               , readOnly = Some True
               , source =
-                  lib.volumes.VolumeSource.ConfigMap
-                    lib.volumes.ConfigMapSource::{ configMap }
+                  lib.storage.VolumeSource.ConfigMap
+                    lib.storage.ConfigMapSource::{ configMap }
               }
             ]
           , service = Some service
@@ -68,9 +63,9 @@ let app =
         ]
       }
 
-in  [ lib.app.mkService service app
-    , lib.ingress.mkIngress ingress app
-    , lib.storage.mkObjectBucketClaim bucket
-    , lib.config.mkConfigMap configMap
-    , lib.app.mkDeployment app
+in  [ lib.mkService service app
+    , lib.mkIngress ingress app
+    , lib.mkObjectBucketClaim bucket app
+    , lib.mkConfigMap configMap app
+    , lib.mkDeployment app
     ]
