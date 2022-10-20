@@ -28,7 +28,7 @@ let bucket =
 let service =
       lib.services.Service::{
       , name = Some "http"
-      , port = 80
+      , port = 8080
       , livenessProbe = Some lib.services.HTTPLivenessProbe::{
         , path = "/"
         , initialDelaySeconds = Some 60
@@ -49,7 +49,7 @@ let app =
           , args =
             [ "-s3-endpoint=https://\$(BUCKET_HOST):\$(BUCKET_PORT)/"
             , "-s3-bucket=\$(BUCKET_NAME)"
-            , "-config /data/linx-server.conf"
+            , "-config=/data/linx-server.conf"
             ]
           , volumes =
             [ lib.volumes.Volume::{

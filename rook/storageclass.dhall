@@ -82,6 +82,7 @@ let objectStore =
           }
         , gateway = Some rook.GatewaySpec::{
           , instances = Some objectStorage.gatewayInstances
+          , port = Some 80
           }
         , healthCheck = Some rook.BucketHealthCheckSpec::{
           , bucket = Some rook.HealthCheckSpec::{
@@ -97,14 +98,14 @@ let objectClass =
       , metadata = kubernetes.ObjectMeta::{
         , name = Some objectStorage.storageName
         }
-      , provisioner = "${objectStorage.namespace}.rbd.csi.ceph.com"
+      , provisioner = "${objectStorage.namespace}.ceph.rook.io/bucket"
+      , reclaimPolicy = Some "Delete"
       , parameters = Some
           ( toMap
               { objectStoreName = objectStorage.name
               , objectStoreNamespace = objectStorage.namespace
               }
           )
-      , reclaimPolicy = Some "Delete"
       }
 
 in  [ typesUnion.Rook (rook.Resource.CephBlockPool blockPool)
