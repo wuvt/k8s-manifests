@@ -9,7 +9,7 @@ let configMap =
           { `linx-server.conf` =
               ''
                 sitename = wuvtLinx
-                siteurl = https://linx.apps.wuvt.vt.edu/
+                siteurl = https://linx-new.apps.wuvt.vt.edu
                 allowhotlink = true
                 maxexpiry = 2592000
                 force-random-filename = true
@@ -32,7 +32,12 @@ let service =
       }
 
 let ingress =
-      lib.networking.Ingress::{ service, host = "linx.apps.wuvt.vt.edu" }
+      lib.networking.Ingress::{
+      , service
+      , host = "linx-new.apps.wuvt.vt.edu"
+      , authenticated = True
+      , sizeLimit = Some "4g"
+      }
 
 let app =
       lib.app.App::{
@@ -42,8 +47,10 @@ let app =
         [ lib.app.Container::{
           , image = "andreimarcu/linx-server:latest"
           , args =
-            [ "-s3-endpoint=https://\$(BUCKET_HOST):\$(BUCKET_PORT)/"
+            [ "-s3-endpoint=http://\$(BUCKET_HOST).cluster.local:\$(BUCKET_PORT)/"
+            , "-s3-region=us-east-1"
             , "-s3-bucket=\$(BUCKET_NAME)"
+            , "-s3-force-path-style=true"
             , "-config=/data/linx-server.conf"
             ]
           , volumes =

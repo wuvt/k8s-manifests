@@ -99,6 +99,30 @@ let mkIngress
               , metadata = kubernetes.ObjectMeta::{
                 , name = Some (app@1.mkFullName app)
                 , labels = Some (app@1.mkLabels app)
+                , annotations =
+                    util.listOptional
+                      (Prelude.Map.Entry Text Text)
+                      (   ( if    ingress.authenticated
+                            then  toMap
+                                    { `nginx.ingress.kubernetes.io/auth-url` =
+                                        "http://oauth2-proxy.default.svc.cluster.local:4180/oauth2/auth"
+                                    , `nginx.ingress.kubernetes.io/auth-signin` =
+                                        "https://login.apps.wuvt.vt.edu/oauth2/start?rd=\$scheme%3A%2F%2F\$host\$escaped_request_uri"
+                                    }
+                            else  Prelude.Map.empty Text Text
+                          )
+                        # util.mapDefault
+                            Text
+                            (Prelude.Map.Type Text Text)
+                            ( \(limit : Text) ->
+                                toMap
+                                  { `nginx.ingress.kubernetes.io/proxy-body-size` =
+                                      limit
+                                  }
+                            )
+                            (Prelude.Map.empty Text Text)
+                            ingress.sizeLimit
+                      )
                 }
               , spec = Some kubernetes.IngressSpec::{
                 , rules = Some

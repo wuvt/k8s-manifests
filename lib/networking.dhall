@@ -86,7 +86,15 @@ let mkServicePorts =
           }
         ]
 
-let Ingress = { Type = { service : Service.Type, host : Text }, default = {=} }
+let Ingress =
+      { Type =
+          { service : Service.Type
+          , host : Text
+          , authenticated : Bool
+          , sizeLimit : Optional Text
+          }
+      , default = { authenticated = False, sizeLimit = None Text }
+      }
 
 in  { Service
     , ServiceProtocol

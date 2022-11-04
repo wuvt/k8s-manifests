@@ -4,8 +4,8 @@ MANIFESTDIR := manifests
 DHALL := dhall-to-yaml-ng
 DHALLFLAGS := --documents
 
-APPS := linx notecharlie postgres
-SECRETS := notecharlie postgres
+APPS := linx notecharlie oauth2-proxy postgres
+SECRETS := notecharlie oauth2-proxy postgres
 
 .PHONY: all
 all: apps secrets rook
