@@ -97,7 +97,8 @@ let mkIngress
         let ingressResource =
               kubernetes.Ingress::{
               , metadata = kubernetes.ObjectMeta::{
-                , name = Some (app@1.mkFullName app)
+                , name = Some
+                    (util.appendMaybe (app@1.mkFullName app) ingress.instance)
                 , labels = Some (app@1.mkLabels app)
                 , annotations =
                     util.listOptional
@@ -122,6 +123,13 @@ let mkIngress
                             )
                             (Prelude.Map.empty Text Text)
                             ingress.sizeLimit
+                        # ( if    ingress.pathRegex
+                            then  toMap
+                                    { `nginx.ingress.kubernetes.io/use-regex` =
+                                        "true"
+                                    }
+                            else  Prelude.Map.empty Text Text
+                          )
                       )
                 }
               , spec = Some kubernetes.IngressSpec::{
@@ -130,19 +138,39 @@ let mkIngress
                     , host = Some ingress.host
                     , http = Some kubernetes.HTTPIngressRuleValue::{
                       , paths =
-                        [ kubernetes.HTTPIngressPath::{
-                          , path = Some "/"
-                          , pathType = "Prefix"
-                          , backend = kubernetes.IngressBackend::{
-                            , service = Some kubernetes.IngressServiceBackend::{
-                              , name = app@1.mkFullName app
-                              , port = Some kubernetes.ServiceBackendPort::{
-                                , number = Some ingress.service.port
-                                }
-                              }
-                            }
-                          }
-                        ]
+                          Prelude.List.map
+                            networking.Path
+                            kubernetes.HTTPIngressPath.Type
+                            ( \(path : networking.Path) ->
+                                let backend =
+                                      kubernetes.IngressBackend::{
+                                      , service = Some kubernetes.IngressServiceBackend::{
+                                        , name = app@1.mkFullName app
+                                        , port = Some kubernetes.ServiceBackendPort::{
+                                          , number = Some ingress.service.port
+                                          }
+                                        }
+                                      }
+
+                                in  merge
+                                      { Prefix =
+                                          \(path : Text) ->
+                                            kubernetes.HTTPIngressPath::{
+                                            , path = Some path
+                                            , pathType = "Prefix"
+                                            , backend
+                                            }
+                                      , Exact =
+                                          \(path : Text) ->
+                                            kubernetes.HTTPIngressPath::{
+                                            , path = Some path
+                                            , pathType = "Exact"
+                                            , backend
+                                            }
+                                      }
+                                      path
+                            )
+                            ingress.paths
                       }
                     }
                   ]

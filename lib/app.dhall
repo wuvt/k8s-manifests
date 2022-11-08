@@ -93,13 +93,7 @@ let mkLabels
 
 let mkFullName
     : App.Type -> Text
-    = \(app : App.Type) ->
-        util.mapDefault
-          Text
-          Text
-          (\(instance : Text) -> "${app.name}-${instance}")
-          app.name
-          app.instance
+    = \(app : App.Type) -> util.appendMaybe app.name app.instance
 
 let mkContainer
     : Text -> Container.Type -> kubernetes.Container.Type

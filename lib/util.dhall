@@ -29,4 +29,10 @@ let mapDefault
       \(o : Optional a) ->
         merge { Some = \(x : a) -> f x, None = d } o
 
-in  { listOptional, mapEmpty, mapDefault }
+let appendMaybe
+    : Text -> Optional Text -> Text
+    = \(a : Text) ->
+      \(b : Optional Text) ->
+        mapDefault Text Text (\(extra : Text) -> "${a}-${extra}") a b
+
+in  { listOptional, mapEmpty, mapDefault, appendMaybe }

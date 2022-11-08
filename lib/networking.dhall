@@ -86,14 +86,25 @@ let mkServicePorts =
           }
         ]
 
+let Path = < Prefix : Text | Exact : Text >
+
 let Ingress =
       { Type =
           { service : Service.Type
+          , instance : Optional Text
           , host : Text
           , authenticated : Bool
           , sizeLimit : Optional Text
+          , paths : List Path
+          , pathRegex : Bool
           }
-      , default = { authenticated = False, sizeLimit = None Text }
+      , default =
+        { instance = None Text
+        , authenticated = False
+        , sizeLimit = None Text
+        , paths = [ Path.Prefix "/" ]
+        , pathRegex = False
+        }
       }
 
 in  { Service
@@ -103,4 +114,5 @@ in  { Service
     , mkContainerPorts
     , mkServicePorts
     , Ingress
+    , Path
     }

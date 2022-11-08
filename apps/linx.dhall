@@ -31,13 +31,25 @@ let service =
         }
       }
 
-let ingress =
+let host = "linx-new.apps.wuvt.vt.edu"
+
+let uploadIngress =
       lib.networking.Ingress::{
+      , instance = Some "upload"
       , service
-      , host = "linx-new.apps.wuvt.vt.edu"
+      , host
       , authenticated = True
       , sizeLimit = Some "4g"
+      , paths =
+        [ lib.networking.Path.Exact "/"
+        , lib.networking.Path.Prefix "/paste"
+        , lib.networking.Path.Prefix "/API"
+        , lib.networking.Path.Prefix "/upload"
+        ]
       }
+
+let downloadIngress =
+      lib.networking.Ingress::{ instance = Some "download", service, host }
 
 let app =
       lib.app.App::{
@@ -71,7 +83,8 @@ let app =
       }
 
 in  [ lib.mkService service app
-    , lib.mkIngress ingress app
+    , lib.mkIngress uploadIngress app
+    , lib.mkIngress downloadIngress app
     , lib.mkObjectBucketClaim bucket app
     , lib.mkConfigMap configMap app
     , lib.mkDeployment app
