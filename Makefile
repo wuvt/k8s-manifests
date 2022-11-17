@@ -5,7 +5,7 @@ DHALL := dhall-to-yaml-ng
 DHALLFLAGS := --documents
 
 APPS := linx metadater notecharlie oauth2-proxy postgres radiotextual \
-retrofling
+retrofling slack-hooks
 SECRETS := metadater notecharlie oauth2-proxy postgres radiotextual
 
 .PHONY: all
