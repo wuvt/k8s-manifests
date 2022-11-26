@@ -4,9 +4,10 @@ MANIFESTDIR := manifests
 DHALL := dhall-to-yaml-ng
 DHALLFLAGS := --documents
 
-APPS := linx metadater notecharlie oauth2-proxy postgres radiotextual \
-retrofling slack-hooks
-SECRETS := metadater notecharlie oauth2-proxy postgres radiotextual
+APPS := linx metadater notecharlie oauth2-proxy postgres postgres-bridge \
+radiotextual retrofling slack-hooks trackman
+SECRETS := metadater notecharlie oauth2-proxy postgres radiotextual \
+trackman-config-am trackman-nginx-am trackman-redis-am trackman-redis-cache-am
 
 .PHONY: all
 all: apps secrets rook
