@@ -8,7 +8,7 @@ let block =
       lib.storage.Block::{
       , name = "pv-claim"
       , store = blockStorage
-      , size = "10Mi"
+      , size = "20Mi"
       }
 
 let app =

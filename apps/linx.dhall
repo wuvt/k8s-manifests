@@ -9,7 +9,7 @@ let configMap =
           { `linx-server.conf` =
               ''
                 sitename = wuvtLinx
-                siteurl = https://linx-new.apps.wuvt.vt.edu
+                siteurl = https://linx.apps.wuvt.vt.edu
                 allowhotlink = true
                 maxexpiry = 2592000
                 force-random-filename = true
@@ -31,7 +31,7 @@ let service =
         }
       }
 
-let host = "linx-new.apps.wuvt.vt.edu"
+let host = "linx.apps.wuvt.vt.edu"
 
 let uploadIngress =
       lib.networking.Ingress::{
