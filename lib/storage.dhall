@@ -12,7 +12,7 @@ let CephObjectStore =
           , gatewayInstances : Natural
           , healthCheckInterval : Text
           }
-      , default = {=}
+      , default.name = "bucket"
       }
 
 let Bucket =
@@ -36,7 +36,7 @@ let Block =
           , accessModes : List Text
           , size : Text
           }
-      , default.accessModes = [ "ReadWriteOnce" ]
+      , default = { name = "pv-claim", accessModes = [ "ReadWriteOnce" ] }
       }
 
 let ConfigMap =
