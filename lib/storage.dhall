@@ -12,11 +12,13 @@ let CephObjectStore =
           , gatewayInstances : Natural
           , healthCheckInterval : Text
           }
-      , default.name = "bucket"
+      , default = {=}
       }
 
 let Bucket =
-      { Type = { name : Text, store : CephObjectStore.Type }, default = {=} }
+      { Type = { name : Text, store : Optional CephObjectStore.Type }
+      , default = { name = "bucket", store = None CephObjectStore.Type }
+      }
 
 let CephBlockPool =
       { Type =
@@ -32,11 +34,15 @@ let CephBlockPool =
 let Block =
       { Type =
           { name : Text
-          , store : CephBlockPool.Type
+          , store : Optional CephBlockPool.Type
           , accessModes : List Text
           , size : Text
           }
-      , default = { name = "pv-claim", accessModes = [ "ReadWriteOnce" ] }
+      , default =
+        { name = "pv-claim"
+        , store = None CephBlockPool.Type
+        , accessModes = [ "ReadWriteOnce" ]
+        }
       }
 
 let ConfigMap =

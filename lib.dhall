@@ -14,6 +14,10 @@ let typesUnion = ./lib/typesUnion.dhall
 
 let util = ./lib/util.dhall
 
+let blockStorage = ./rook/blockStorage.dhall
+
+let objectStorage = ./rook/objectStorage.dhall
+
 let mkDeployment
     : app.App.Type -> typesUnion
     = \(app : app.App.Type) ->
@@ -190,7 +194,12 @@ let mkBlockStorageClaim
                 , labels = Some (app@1.mkLabels app)
                 }
               , spec = Some kubernetes.PersistentVolumeClaimSpec::{
-                , storageClassName = Some block.store.storageName
+                , storageClassName = Some
+                    ( Prelude.Optional.default
+                        storage.CephBlockPool.Type
+                        blockStorage
+                        block.store
+                    ).storageName
                 , accessModes = Some block.accessModes
                 , resources = Some kubernetes.ResourceRequirements::{
                   , requests = Some (toMap { storage = block.size })
@@ -212,7 +221,12 @@ let mkObjectBucketClaim
                 , labels = Some (app@1.mkLabels app)
                 }
               , spec = Some rook.ObjectBucketClaimSpec::{
-                , storageClassName = bucket.store.storageName
+                , storageClassName =
+                    ( Prelude.Optional.default
+                        storage.CephObjectStore.Type
+                        objectStorage
+                        bucket.store
+                    ).storageName
                 , generateBucketName = Some
                     "${app@1.mkFullName app}-${bucket.name}"
                 }

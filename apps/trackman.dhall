@@ -1,7 +1,5 @@
 let lib = ../lib.dhall
 
-let blockStorage = ../rook/blockStorage.dhall
-
 let configSecret = ../secrets/trackman-config-am.dhall
 
 let nginxSecret = ../secrets/trackman-nginx-am.dhall
@@ -97,12 +95,7 @@ let scheduler =
 
 let redisService = lib.networking.Service::{ name = Some "redis", port = 6379 }
 
-let redisBlock =
-      lib.storage.Block::{
-      , name = "pv-claim"
-      , store = blockStorage
-      , size = "1Gi"
-      }
+let redisBlock = lib.storage.Block::{ size = "1Gi" }
 
 let redis =
       lib.app.App::{

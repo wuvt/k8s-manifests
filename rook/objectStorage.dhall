@@ -1,4 +1,4 @@
-let storage = (../lib.dhall).storage
+let storage = ../lib/storage.dhall
 
 in  storage.CephObjectStore::{
     , name = "objectstore"

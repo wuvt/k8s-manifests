@@ -1,7 +1,5 @@
 let lib = ../lib.dhall
 
-let objectStorage = ../rook/objectStorage.dhall
-
 let configMap =
       lib.storage.ConfigMap::{
       , name = "config"
@@ -17,7 +15,7 @@ let configMap =
           }
       }
 
-let bucket = lib.storage.Bucket::{ name = "bucket", store = objectStorage }
+let bucket = lib.storage.Bucket::{=}
 
 let service =
       lib.networking.Service::{

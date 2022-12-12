@@ -1,15 +1,8 @@
 let lib = ../lib.dhall
 
-let blockStorage = ../rook/blockStorage.dhall
-
 let secret = ../secrets/notecharlie.dhall
 
-let block =
-      lib.storage.Block::{
-      , name = "pv-claim"
-      , store = blockStorage
-      , size = "20Mi"
-      }
+let block = lib.storage.Block::{ size = "20Mi" }
 
 let app =
       lib.app.App::{
