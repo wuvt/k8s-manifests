@@ -33,7 +33,7 @@ manifests: all
 		cp secrets/$$SECRET.yaml ${MANIFESTDIR}/secret.$$SECRET.yaml; \
 		echo "cp secrets/$$SECRET.yaml ${MANIFESTDIR}/secret.$$SECRET.yaml"; \
 	done
-	@for ROOK in cluster common crds operator storageclass toolbox ; do \
+	@for ROOK in cluster operator storageclass ; do \
 		cp rook/$$ROOK.yaml ${MANIFESTDIR}/rook.$$ROOK.yaml; \
 		echo "cp rooks/$$ROOK.yaml ${MANIFESTDIR}/rook.$$ROOK.yaml"; \
 	done
