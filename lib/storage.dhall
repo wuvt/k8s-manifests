@@ -52,11 +52,17 @@ let ConfigMap =
 
 let BlockStorageSource = { Type = { block : Block.Type }, default = {=} }
 
-let ConfigMapSource = { Type = { configMap : ConfigMap.Type }, default = {=} }
+let ConfigMapSource =
+      { Type = { configMap : ConfigMap.Type, mode : Optional Natural }
+      , default.mode = None Natural
+      }
 
 let HostSource = { Type = { path : Text }, default = {=} }
 
-let SecretSource = { Type = { secret : kubernetes.Secret.Type }, default = {=} }
+let SecretSource =
+      { Type = { secret : kubernetes.Secret.Type, mode : Optional Natural }
+      , default.mode = None Natural
+      }
 
 let TZInfoSource =
       { Type = { timezone : Text }, default.timezone = "America/New_York" }
@@ -99,6 +105,7 @@ let mkVolumeSource
                 , name = volume.name
                 , configMap = Some kubernetes.ConfigMapVolumeSource::{
                   , name = Some "${appName}-${cmVolume.configMap.name}"
+                  , defaultMode = cmVolume.mode
                   }
                 }
           , Host =
@@ -115,6 +122,7 @@ let mkVolumeSource
                 , name = volume.name
                 , secret = Some kubernetes.SecretVolumeSource::{
                   , secretName = sVolume.secret.metadata.name
+                  , defaultMode = sVolume.mode
                   }
                 }
           , TZInfo =

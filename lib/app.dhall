@@ -45,6 +45,7 @@ let Container =
           , args : List Text
           , env : List Variable.Type
           , volumes : List storage.Volume.Type
+          , extraCapabilites : List Text
           , service : Optional networking.Service.Type
           , bucket : Optional storage.Bucket.Type
           }
@@ -54,6 +55,7 @@ let Container =
         , args = [] : List Text
         , env = [] : List Variable.Type
         , volumes = [] : List storage.Volume.Type
+        , extraCapabilites = [] : List Text
         , service = None networking.Service.Type
         , bucket = None storage.Bucket.Type
         }
@@ -122,6 +124,18 @@ let mkContainer
               (List kubernetes.ContainerPort.Type)
               networking.mkContainerPorts
               container.service
+        , securityContext =
+            Prelude.Optional.map
+              (List Text)
+              kubernetes.SecurityContext.Type
+              ( \(caps : List Text) ->
+                  kubernetes.SecurityContext::{
+                  , capabilities = Some kubernetes.Capabilities::{
+                    , add = Some caps
+                    }
+                  }
+              )
+              (util.listOptional Text container.extraCapabilites)
         , env =
             util.listOptional
               kubernetes.EnvVar.Type

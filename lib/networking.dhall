@@ -25,6 +25,7 @@ let HTTPLivenessProbe =
 let Service =
       { Type =
           { name : Optional Text
+          , open : Bool
           , protocol : ServiceProtocol
           , port : Natural
           , targetPort : Optional Natural
@@ -32,6 +33,7 @@ let Service =
           }
       , default =
         { name = None Text
+        , open = False
         , protocol = ServiceProtocol.TCPService
         , targetPort = None Natural
         , livenessProbe = None HTTPLivenessProbe.Type
