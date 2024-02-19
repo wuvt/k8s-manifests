@@ -1,4 +1,5 @@
 .POSIX:
+.SUFFIXES:
 
 MANIFESTDIR := manifests
 DHALL := dhall-to-yaml-ng
@@ -63,8 +64,7 @@ hash:
 		printf "{} - "; dhall hash --file {}' \;
 
 .SUFFIXES: .dhall .yaml
-.dhall.yaml: lib.dhall Prelude.dhall kubernetes.dhall rook.dhall \
-rook/blockStorage.dhall rook/objectStorage.dhall
+.dhall.yaml:
 	${DHALL} ${DHALLFLAGS} --file $< --output $@
 
 lib.dhall: \
