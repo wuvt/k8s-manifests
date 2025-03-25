@@ -89,7 +89,8 @@ let mkService
               , spec = Some kubernetes.ServiceSpec::{
                 , selector = Some (app@1.mkLabels app)
                 , ports = Some (networking.mkServicePorts service)
-                , externalTrafficPolicy = if service.open then Some "Local" else None Text
+                , externalTrafficPolicy =
+                    if service.open then Some "Local" else None Text
                 , type = if service.open then Some "LoadBalancer" else None Text
                 }
               }
