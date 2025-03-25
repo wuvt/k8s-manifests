@@ -5,3 +5,5 @@ rook/storageclass.yaml
 
 secrets/*
 !secrets/*.dhall
+
+.history
