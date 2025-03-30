@@ -2,7 +2,7 @@
 .SUFFIXES:
 
 MANIFESTDIR := manifests
-DHALL := dhall-to-yaml
+DHALL := dhall-to-yaml-ng
 DHALLFLAGS := --documents
 
 APPS := linx metadater notecharlie oauth2-proxy opensmtpd postgres \
