@@ -7,11 +7,11 @@ let secret =
       , stringData = Some
           ( toMap
               { `client_secrets.json` =
-                  ./wuvt-site/config-am/client_secrets.json as Text
-              , `config.json` = ./wuvt-site/config-am/config.json as Text
+                  ./k8s-secrets/secrets/wuvt-site/config-am/client_secrets.json as Text
+              , `config.json` = ./k8s-secrets/secrets/wuvt-site/config-am/config.json as Text
               , `service_account.json` =
-                  ./wuvt-site/config-am/service_account.json as Text
-              , `uwsgi.ini` = ./wuvt-site/config-am/uwsgi.ini as Text
+                  ./k8s-secrets/secrets/wuvt-site/config-am/service_account.json as Text
+              , `uwsgi.ini` = ./k8s-secrets/secrets/wuvt-site/config-am/uwsgi.ini as Text
               }
           )
       }

@@ -6,10 +6,10 @@ let config =
       , type = Some "Opaque"
       , stringData = Some
           ( toMap
-              { `smtpd.conf` = ./opensmtpd/config/smtpd.conf as Text
-              , mailname = ./opensmtpd/config/mailname as Text
-              , aliases = ./opensmtpd/config/aliases as Text
-              , sources = ./opensmtpd/config/sources as Text
+              { `smtpd.conf` = ./k8s-secrets/secrets/opensmtpd/config/smtpd.conf as Text
+              , mailname = ./k8s-secrets/secrets/opensmtpd/config/mailname as Text
+              , aliases = ./k8s-secrets/secrets/opensmtpd/config/aliases as Text
+              , sources = ./k8s-secrets/secrets/opensmtpd/config/sources as Text
               }
           )
       }
@@ -20,8 +20,8 @@ let tls =
       , type = Some "kubernetes.io/tls"
       , stringData = Some
           ( toMap
-              { `tls.crt` = ./opensmtpd/tls/tls.crt as Text
-              , `tls.key` = ./opensmtpd/tls/tls.key as Text
+              { `tls.crt` = ./k8s-secrets/secrets/opensmtpd/tls/tls.crt as Text
+              , `tls.key` = ./k8s-secrets/secrets/opensmtpd/tls/tls.key as Text
               }
           )
       }

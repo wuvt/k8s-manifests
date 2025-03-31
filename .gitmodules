@@ -1,0 +1,4 @@
+[submodule "secrets/k8s-secrets"]
+	path = secrets/k8s-secrets
+	url = ssh://alexandria.wuvt.vt.edu:/tank/share/dept/it/repos/k8s-secrets.git
+	branch = master

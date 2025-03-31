@@ -5,7 +5,7 @@ let secret =
       , metadata = kubernetes.ObjectMeta::{ name = Some "trackman-nginx-am" }
       , type = Some "Opaque"
       , stringData = Some
-          (toMap { `default.conf` = ./trackman/nginx-am/default.conf as Text })
+          (toMap { `default.conf` = ./k8s-secrets/secrets/trackman/nginx-am/default.conf as Text })
       }
 
 in  secret
