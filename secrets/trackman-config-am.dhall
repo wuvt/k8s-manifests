@@ -7,10 +7,10 @@ let secret =
       , stringData = Some
           ( toMap
               { `client_secrets.json` =
-                  ./trackman/config-am/client_secrets.json as Text
-              , `config.json` = ./trackman/config-am/config.json as Text
+                  ./k8s-secrets/secrets/trackman/config-am/client_secrets.json as Text
+              , `config.json` = ./k8s-secrets/secrets/trackman/config-am/config.json as Text
               , `service_account.json` =
-                  ./trackman/config-am/service_account.json as Text
+                  ./k8s-secrets/secrets/trackman/config-am/service_account.json as Text
               }
           )
       }

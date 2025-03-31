@@ -72,3 +72,13 @@ hash:
 lib.dhall: \
 lib/app.dhall lib/networking.dhall lib/storage.dhall lib/typesUnion.dhall \
 lib/util.dhall
+
+secrets-encrypt: secrets/k8s-secrets/secrets/*
+	rm -f secrets/k8s-secrets/secrets.tar.gpg secrets/k8s-secrets/secrets.tar
+	tar cf secrets/k8s-secrets/secrets.tar secrets/k8s-secrets/secrets/*
+	gpg --batch --passphrase-file secrets/k8s-secrets/key.txt --symmetric secrets/k8s-secrets/secrets.tar
+	rm -f secrets/k8s-secrets/secrets.tar
+
+secrets-decrypt: secrets/k8s-secrets/secrets.tar.gpg
+	rm -rf secrets/k8s-secrets/secrets
+	gpg --batch --passphrase-file secrets/k8s-secrets/key.txt --decrypt secrets/k8s-secrets/secrets.tar.gpg | tar xf - --directory=secrets/k8s-secrets/
