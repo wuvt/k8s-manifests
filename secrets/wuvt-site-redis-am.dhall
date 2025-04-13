@@ -5,7 +5,11 @@ let secret =
       , metadata = kubernetes.ObjectMeta::{ name = Some "wuvt-site-redis-am" }
       , type = Some "Opaque"
       , stringData = Some
-          (toMap { password = ./k8s-secrets/secrets/wuvt-site/redis-am/password.txt as Text })
+          ( toMap
+              { password =
+                  ./k8s-secrets/secrets/wuvt-site/redis-am/password.txt as Text
+              }
+          )
       }
 
 in  secret

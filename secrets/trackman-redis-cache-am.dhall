@@ -7,7 +7,11 @@ let secret =
         }
       , type = Some "Opaque"
       , stringData = Some
-          (toMap { password = ./k8s-secrets/secrets/trackman/redis-cache-am/password.txt as Text })
+          ( toMap
+              { password =
+                  ./k8s-secrets/secrets/trackman/redis-cache-am/password.txt as Text
+              }
+          )
       }
 
 in  secret

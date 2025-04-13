@@ -6,7 +6,9 @@ let secret =
       , type = Some "Opaque"
       , stringData = Some
           ( toMap
-              { `LocalSettings.php` = ./k8s-secrets/secrets/mediawiki/LocalSettings.php as Text }
+              { `LocalSettings.php` =
+                  ./k8s-secrets/secrets/mediawiki/LocalSettings.php as Text
+              }
           )
       }
 

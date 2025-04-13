@@ -6,8 +6,10 @@ let config =
       , type = Some "Opaque"
       , stringData = Some
           ( toMap
-              { `smtpd.conf` = ./k8s-secrets/secrets/opensmtpd/config/smtpd.conf as Text
-              , mailname = ./k8s-secrets/secrets/opensmtpd/config/mailname as Text
+              { `smtpd.conf` =
+                  ./k8s-secrets/secrets/opensmtpd/config/smtpd.conf as Text
+              , mailname =
+                  ./k8s-secrets/secrets/opensmtpd/config/mailname as Text
               , aliases = ./k8s-secrets/secrets/opensmtpd/config/aliases as Text
               , sources = ./k8s-secrets/secrets/opensmtpd/config/sources as Text
               }
