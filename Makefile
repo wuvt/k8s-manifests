@@ -7,7 +7,7 @@ DHALLFLAGS := --documents
 
 APPS := linx metadater notecharlie oauth2-proxy opensmtpd postgres \
 postgres-bridge radiotextual retrofling slack-hooks trackman wuvt-site \
-mediawiki fileserver
+mediawiki fileserver burk
 SECRETS := metadater notecharlie oauth2-proxy opensmtpd postgres radiotextual \
 trackman-config-am trackman-nginx-am trackman-redis-am \
 trackman-redis-cache-am wuvt-site-config-am wuvt-site-redis-am \
