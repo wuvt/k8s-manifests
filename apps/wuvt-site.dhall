@@ -17,7 +17,7 @@ let app =
       , replicas = 2
       , containers =
         [ lib.app.Container::{
-          , image = "ghcr.io/wuvt/wuvt-site:v2.1.15"
+          , image = "ghcr.io/wuvt/wuvt-site:latest"
           , args = [ "uwsgi", "--ini", "/data/config/uwsgi.ini" ]
           , volumes =
             [ lib.storage.Volume::{
