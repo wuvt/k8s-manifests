@@ -31,11 +31,7 @@ let endpoint =
           , port = Some 5432
           }
         ]
-      , endpoints =
-        [ kubernetes.Endpoint::{
-          , addresses = [ "10.23.16.5" ]
-          }
-        ]
+      , endpoints = [ kubernetes.Endpoint::{ addresses = [ "10.23.16.5" ] } ]
       }
 
 in  [ kubernetes.Resource.Service service
