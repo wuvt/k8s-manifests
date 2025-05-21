@@ -11,7 +11,7 @@ mediawiki fileserver burk postgres-oceangate
 SECRETS := metadater notecharlie oauth2-proxy opensmtpd postgres radiotextual \
 trackman-config-am trackman-nginx-am trackman-redis-am \
 trackman-redis-cache-am wuvt-site-config-am wuvt-site-redis-am \
-mediawiki
+mediawiki wuvt-site-config-fm wuvt-site-redis-fm
 
 .PHONY: all
 all: apps secrets rook
