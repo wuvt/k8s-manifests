@@ -99,6 +99,9 @@ let Ingress =
           , sizeLimit : Optional Text
           , paths : List Path
           , pathRegex : Bool
+          , tls : Bool
+          , httpsBackend : Bool
+          , tlsSecret : Optional kubernetes.Secret.Type
           }
       , default =
         { instance = None Text
@@ -106,6 +109,9 @@ let Ingress =
         , sizeLimit = None Text
         , paths = [ Path.Prefix "/" ]
         , pathRegex = False
+        , tls = False
+        , httpsBackend = False
+        , tlsSecret = None kubernetes.Secret.Type
         }
       }
 

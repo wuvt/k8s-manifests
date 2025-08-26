@@ -137,9 +137,32 @@ let mkIngress
                                     }
                             else  Prelude.Map.empty Text Text
                           )
+                        # ( if    ingress.httpsBackend
+                            then  toMap
+                                    { `nginx.ingress.kubernetes.io/backend-protocol` =
+                                        "HTTPS"
+                                    }
+                            else  Prelude.Map.empty Text Text
+                          )
                       )
                 }
               , spec = Some kubernetes.IngressSpec::{
+                , tls =
+                    if    ingress.tls
+                    then  Some
+                            [ kubernetes.IngressTLS::{
+                              , hosts = Some [ ingress.host ]
+                              , secretName =
+                                  merge
+                                    { Some =
+                                        \(s : kubernetes.Secret.Type) ->
+                                          s.metadata.name
+                                    , None = Some (ingress.host ++ "-tls")
+                                    }
+                                    ingress.tlsSecret
+                              }
+                            ]
+                    else  None (List kubernetes.IngressTLS.Type)
                 , rules = Some
                   [ kubernetes.IngressRule::{
                     , host = Some ingress.host
