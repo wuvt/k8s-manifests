@@ -9,10 +9,25 @@ let ploadService =
       , targetPort = Some 5000
       }
 
-let ploadIngress =
+let ploadHost = "playlists-fm.apps.wuvt.vt.edu"
+
+let ploadIngressNoAuthAutomation =
       lib.networking.Ingress::{
+      , instance = Some "automation"
       , service = ploadService
-      , host = "new-playlists-fm.apps.wuvt.vt.edu"
+      , host = ploadHost
+      , authenticated = False
+      , paths =
+        [ lib.networking.Path.Exact "/api/next_track"
+        , lib.networking.Path.Exact "/api/underwriting"
+        ]
+      }
+
+let ploadIngressGeneral =
+      lib.networking.Ingress::{
+      , instance = Some "general"
+      , service = ploadService
+      , host = ploadHost
       , authenticated = True
       }
 
@@ -122,7 +137,8 @@ let elasticsearch =
       }
 
 in  [ lib.mkService ploadService pload
-    , lib.mkIngress ploadIngress pload
+    , lib.mkIngress ploadIngressNoAuthAutomation pload
+    , lib.mkIngress ploadIngressGeneral pload
     , lib.mkDeployment pload
     , lib.mkService elasticsearchService elasticsearch
     , lib.mkBlockStorageClaim elasticsearchBlock elasticsearch
