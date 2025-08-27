@@ -7,13 +7,13 @@ DHALLFLAGS := --documents
 
 APPS := linx metadater notecharlie oauth2-proxy opensmtpd postgres \
 postgres-bridge radiotextual retrofling slack-hooks trackman wuvt-site \
-mediawiki fileserver burk postgres-oceangate
+mediawiki fileserver burk postgres-oceangate pload
 SECRETS := metadater notecharlie oauth2-proxy opensmtpd postgres radiotextual \
 trackman-config-am trackman-nginx-am trackman-redis-am \
 trackman-redis-cache-am wuvt-site-config-am wuvt-site-redis-am \
 mediawiki wuvt-site-config-fm wuvt-site-redis-fm wuvt-site-tls-am \
 wuvt-site-tls-fm trackman-config-fm trackman-nginx-fm trackman-redis-fm \
-trackman-redis-cache-fm
+trackman-redis-cache-fm elasticsearch pload-fm
 
 .PHONY: all
 all: apps secrets rook
