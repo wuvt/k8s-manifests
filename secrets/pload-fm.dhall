@@ -11,7 +11,6 @@ let secret =
               , id_ed25519 = ./k8s-secrets/secrets/pload-fm/id_ed25519 as Text
               , `id_ed25519.pub` =
                   ./k8s-secrets/secrets/pload-fm/id_ed25519.pub as Text
-              , known_hosts = ./k8s-secrets/secrets/pload-fm/known_hosts as Text
               }
           )
       }

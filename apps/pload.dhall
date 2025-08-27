@@ -73,7 +73,7 @@ let elasticsearch =
       , containers =
         [ lib.app.Container::{
           , name = Some "elasticsearch"
-          , image = "elasticsearch:8.0.0"
+          , image = "elasticsearch:7.16.1"
           , volumes =
             [ lib.storage.Volume::{
               , name = "elasticsearch-data"
@@ -84,14 +84,8 @@ let elasticsearch =
                     , block = elasticsearchBlock
                     }
               }
-            , lib.storage.Volume::{
-              , name = "elasticsearch-nginx-auth"
-              , mountPath = "/etc/nginx/auth"
-              , source =
-                  lib.storage.VolumeSource.Secret
-                    lib.storage.SecretSource::{ secret = elasticsearchSecret }
-              }
             ]
+          , extraCapabilites = [ "SYS_CHROOT" ]
           , env =
             [ lib.app.Variable::{
               , name = "cluster.name"
@@ -104,6 +98,23 @@ let elasticsearch =
             , lib.app.Variable::{
               , name = "ES_JAVA_OPTS"
               , source = lib.app.VariableSource.Value "-Xms4G -Xmx4G"
+              }
+            , lib.app.Variable::{
+              , name = "xpack.ml.enabled"
+              , source = lib.app.VariableSource.Value "false"
+              }
+            ]
+          }
+        , lib.app.Container::{
+          , name = Some "elasticsearch-nginx"
+          , image = "wuvt/nginx-elasticsearch:latest"
+          , volumes =
+            [ lib.storage.Volume::{
+              , name = "elasticsearch-nginx-auth"
+              , mountPath = "/etc/nginx/auth"
+              , source =
+                  lib.storage.VolumeSource.Secret
+                    lib.storage.SecretSource::{ secret = elasticsearchSecret }
               }
             ]
           }
