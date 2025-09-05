@@ -13,7 +13,7 @@ trackman-config-am trackman-nginx-am trackman-redis-am \
 trackman-redis-cache-am wuvt-site-config-am wuvt-site-redis-am \
 mediawiki wuvt-site-config-fm wuvt-site-redis-fm wuvt-site-tls-am \
 wuvt-site-tls-fm trackman-config-fm trackman-nginx-fm trackman-redis-fm \
-trackman-redis-cache-fm elasticsearch pload-fm
+trackman-redis-cache-fm elasticsearch pload-fm trackman-tls-fm trackman-tls-am
 
 .PHONY: all
 all: apps secrets rook

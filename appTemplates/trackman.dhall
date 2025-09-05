@@ -7,6 +7,7 @@ let mkTrackmanApp
       , service : lib.networking.Service.Type
       , configSecret : kubernetes.Secret.Type
       , nginxSecret : kubernetes.Secret.Type
+      , tlsSecret : kubernetes.Secret.Type
       } ->
         lib.app.App.Type
     = \ ( params
@@ -14,6 +15,7 @@ let mkTrackmanApp
           , service : lib.networking.Service.Type
           , configSecret : kubernetes.Secret.Type
           , nginxSecret : kubernetes.Secret.Type
+          , tlsSecret : kubernetes.Secret.Type
           }
         ) ->
         lib.app.App::{
@@ -26,7 +28,7 @@ let mkTrackmanApp
             , image = "ghcr.io/wuvt/trackman:latest"
             , volumes =
               [ lib.storage.Volume::{
-                , name = "trackman-am-config"
+                , name = "config"
                 , mountPath = "/data/config"
                 , readOnly = Some True
                 , source =
@@ -51,12 +53,20 @@ let mkTrackmanApp
             , image = "ghcr.io/wuvt/trackman-nginx:latest"
             , volumes =
               [ lib.storage.Volume::{
-                , name = "trackman-am-nginx-config"
+                , name = "nginx-config"
                 , mountPath = "/etc/nginx/conf.d"
                 , readOnly = Some True
                 , source =
                     lib.storage.VolumeSource.Secret
                       lib.storage.SecretSource::{ secret = params.nginxSecret }
+                }
+              , lib.storage.Volume::{
+                , name = "tls"
+                , mountPath = "/data/tls"
+                , readOnly = Some True
+                , source =
+                    lib.storage.VolumeSource.Secret
+                      lib.storage.SecretSource::{ secret = params.tlsSecret }
                 }
               ]
             , service = Some params.service
@@ -77,7 +87,7 @@ let mkTrackmanSchedulerApp
             , command = [ "flask", "run-scheduler" ]
             , volumes =
               [ lib.storage.Volume::{
-                , name = "trackman-am-config"
+                , name = "config"
                 , mountPath = "/data/config"
                 , readOnly = Some True
                 , source =
