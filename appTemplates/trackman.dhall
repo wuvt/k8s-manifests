@@ -21,7 +21,7 @@ let mkTrackmanApp
         lib.app.App::{
         , name = "trackman"
         , instance = Some params.instance
-        , replicas = 2
+        , replicas = 1
         , containers =
           [ lib.app.Container::{
             , name = Some "trackman"
