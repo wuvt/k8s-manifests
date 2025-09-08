@@ -102,6 +102,7 @@ let Ingress =
           , tls : Bool
           , httpsBackend : Bool
           , tlsSecret : Optional kubernetes.Secret.Type
+          , extraAnnotations : Optional (Prelude.Map.Type Text Text)
           }
       , default =
         { instance = None Text
@@ -112,6 +113,7 @@ let Ingress =
         , tls = False
         , httpsBackend = False
         , tlsSecret = None kubernetes.Secret.Type
+        , extraAnnotations = None (Prelude.Map.Type Text Text)
         }
       }
 

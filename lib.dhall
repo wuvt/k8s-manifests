@@ -144,6 +144,12 @@ let mkIngress
                                     }
                             else  Prelude.Map.empty Text Text
                           )
+                        # util.mapDefault
+                            (Prelude.Map.Type Text Text)
+                            (Prelude.Map.Type Text Text)
+                            (\(m : Prelude.Map.Type Text Text) -> m)
+                            (Prelude.Map.empty Text Text)
+                            ingress.extraAnnotations
                       )
                 }
               , spec = Some kubernetes.IngressSpec::{
