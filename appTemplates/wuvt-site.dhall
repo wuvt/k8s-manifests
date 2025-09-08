@@ -21,7 +21,7 @@ let mkWuvtSiteApp
         lib.app.App::{
         , name = "wuvt-site"
         , instance = Some params.instance
-        , replicas = 2
+        , replicas = 4
         , containers =
           [ lib.app.Container::{
             , image = "ghcr.io/wuvt/wuvt-site:latest"
