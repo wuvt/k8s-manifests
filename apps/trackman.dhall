@@ -77,6 +77,17 @@ let ingressFM =
       , tls = True
       , tlsSecret = Some tlsFMSecret
       , httpsBackend = True
+      , extraAnnotations = Some
+          ( toMap
+              { `nginx.ingress.kubernetes.io/client-body-timeout` = "300"
+              , `nginx.ingress.kubernetes.io/client-header-timeout` = "300"
+              , `nginx.ingress.kubernetes.io/keep-alive` = "300"
+              , `nginx.ingress.kubernetes.io/proxy-connect-timeout` = "300"
+              , `nginx.ingress.kubernetes.io/proxy-read-timeout` = "300"
+              , `nginx.ingress.kubernetes.io/proxy-send-timeout` = "300"
+              , `nginx.ingress.kubernetes.io/upstream-keepalive-timeout` = "300"
+              }
+          )
       }
 
 let appFM =
