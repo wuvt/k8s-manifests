@@ -38,7 +38,7 @@ let app =
               }
             , lib.app.Variable::{ {- this does practically nothing -}
               , name = "FE_ALLOWED"
-              , source = lib.app.VariableSource.Value "192.168.0.0/24 10.0.0.0/8 172.16.0.0/12 fd00::/8"
+              , source = lib.app.VariableSource.Value "192.168.0.0/24 10.0.0.0/8 172.16.0.0/12 fd00::/8 2607:b400:a:280::/60 2607:b400:0090:a080::/60"
               }
             ]
           }
