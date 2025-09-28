@@ -6,7 +6,6 @@ let ingress =
       lib.networking.Ingress::{
       , service
       , host = "rolled.apps.wuvt.vt.edu"
-      , authenticated = True
       }
 
 let app =
